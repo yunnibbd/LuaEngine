@@ -1,11 +1,19 @@
 #include <stdio.h>
-#include "binary_chunk.h"
-#include "buffer_stream.h"
+#include "./BinChunk/binary_chunk.h"
+#include "cbuffer.h"
+#include <string.h>
+#include <windows.h>
 
 int main() {
-	BufferStream buffer_stream = BufferStreamAlloc(1024);
-	BufferStreamWrite(buffer_stream, LUA_SIGNATURE, strlen(LUA_SIGNATURE));
-	BufferStreamWriteUInt8(buffer_stream, LUAC_VERSION);
-	CheckHeader(buffer_stream);
+	CBuffer buffer = CBufferAlloc(1024);
+	CBufferPush(buffer, LUA_SIGNATURE, strlen(LUA_SIGNATURE));
+	unsigned char luac_version = LUAC_VERSION;
+	CBufferPush(buffer, &luac_version, sizeof(LUAC_VERSION));
+
+	BinaryChunkInit(buffer);
+	BinaryChunkCheckHeader();
+
+	CBufferFree(buffer);
+	system("pause");
 	return 0;
 }

@@ -18,18 +18,24 @@
     <ClCompile Include="main.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="binary_chunk.c">
+    <ClCompile Include="BinChunk\binary_chunk.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="buffer_stream.c">
+    <ClCompile Include="cbuffer_stream.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cbuffer.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="binary_chunk.h">
+    <ClInclude Include="BinChunk\binary_chunk.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="buffer_stream.h">
+    <ClInclude Include="cbuffer_stream.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cbuffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

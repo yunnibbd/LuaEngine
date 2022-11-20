@@ -123,13 +123,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="binary_chunk.c" />
-    <ClCompile Include="buffer_stream.c" />
+    <ClCompile Include="BinChunk\binary_chunk.c" />
+    <ClCompile Include="cbuffer.c" />
+    <ClCompile Include="cbuffer_stream.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="binary_chunk.h" />
-    <ClInclude Include="buffer_stream.h" />
+    <ClInclude Include="BinChunk\binary_chunk.h" />
+    <ClInclude Include="cbuffer.h" />
+    <ClInclude Include="cbuffer_stream.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
