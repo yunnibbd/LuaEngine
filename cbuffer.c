@@ -47,7 +47,7 @@ bool CBufferPush(CBuffer buffer, const char* data, int size) {
 void CBufferPop(CBuffer buffer, int size) {
 	int remain_size = buffer->data_size_ - size;
 	if (remain_size >= 0) {
-		memcpy(buffer->data_, buffer->data_ + buffer->data_size_, remain_size);
+		memcpy(buffer->data_, buffer->data_ + size, remain_size);
 		buffer->data_size_ = remain_size;
 	}
 	else {
