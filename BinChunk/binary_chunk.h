@@ -1,8 +1,8 @@
 #ifndef __BINARY_CHUNK_H__
 #define __BINARY_CHUNK_H__
 #include <inttypes.h>
-#include <stdbool.h>
 #include "../cbuffer.h"
+#include <stdbool.h>
 
 typedef struct {
 	unsigned char Instack;
@@ -10,7 +10,7 @@ typedef struct {
 } Upvalue;
 
 typedef struct {
-	unsigned char* Varname;
+	CBuffer VarName;
 	uint32_t StartPC;
 	uint32_t EndPC;
 } LocVar;
@@ -19,30 +19,30 @@ typedef struct {
 	unsigned char signature[4];
 	unsigned char version;
 	unsigned char format;
-	unsigned char luacData[6];
-	unsigned  char cintSize;
+	unsigned char luaCData[6];
+	unsigned char cintSize;
 	unsigned char sizetSize;
 	unsigned char instructionSize;
 	unsigned char luaIntegerSize;
 	unsigned char luaNumberSize;
-	long luacInt;
+	int64_t luacInt;
 	double luacNum;
 } Header;
 
 typedef struct Prototype {
-	unsigned char* Source;
+	CBuffer Source;
 	uint32_t LineDefined;
 	uint32_t LastLineDefined;
-	unsigned char NunParams;
+	unsigned char NumParams;
 	unsigned char IsVararg;
 	unsigned char MaxStackSize;
-	unsigned char* Code;
+	uint32_t* Code;
 	void* Constants;
 	Upvalue* Upvalues;
 	struct Prototype* Protos;
 	uint32_t* LineInfo;
 	LocVar* LocVars;
-	unsigned char* UpvalueNames;
+	CBuffer* UpvalueNames;
 } Prototype;
 
 typedef struct {
@@ -74,7 +74,23 @@ void BinaryChunkInit(CBuffer buffer);
 
 CBuffer BinaryChunkReadString();
 
-bool BinaryChunkCheckHeader();
+bool BinaryChunkCheckHead();
+
+uint32_t* BinaryChunkReadCode();
+
+void BinaryChunkReadConstant();
+
+void* BinaryChunkReadConstants();
+
+Upvalue* BinaryChunkReadUpvalues();
+
+Prototype* BinaryChunkReadProtos();
+
+uint32_t* BinaryChunkReadLineInfo();
+
+LocVar* BinaryChunkReadLocVars();
+
+CBuffer* BinaryChunkReadUpvalueNames();
 
 Prototype* BinaryChunkReadProto();
 

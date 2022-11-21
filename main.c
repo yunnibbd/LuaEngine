@@ -11,7 +11,7 @@ int main() {
 	CBufferPush(buffer, &luac_version, sizeof(LUAC_VERSION));
 
 	BinaryChunkInit(buffer);
-	BinaryChunkCheckHeader();
+	BinaryChunkCheckHead();
 
 	CBufferFree(buffer);
 	system("pause");
