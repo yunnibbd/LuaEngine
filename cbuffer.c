@@ -17,6 +17,14 @@ CBuffer CBufferAlloc(int size) {
 	return buffer;
 }
 
+CBuffer CBufferFromStr(char* data, int data_size) {
+	CBuffer buffer = malloc(sizeof(StructCBuffer));
+	buffer->size_ = data_size;
+	buffer->data_ = data;
+	buffer->data_size_ = data_size;
+	return buffer;
+}
+
 void CBufferFree(CBuffer buffer) {
 	if (buffer != NULL) {
 		if (buffer->data_ != NULL) {

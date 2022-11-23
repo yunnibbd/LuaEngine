@@ -29,6 +29,14 @@ typedef struct {
 	double luacNum;
 } Header;
 
+typedef union{
+	uint8_t tag_nil;
+	uint8_t tag_boolean;
+	uint64_t tag_integer;
+	double tag_number;
+	CBuffer tag_str;
+} ConstantType;
+
 typedef struct Prototype {
 	CBuffer Source;
 	uint32_t LineDefined;
@@ -37,7 +45,7 @@ typedef struct Prototype {
 	unsigned char IsVararg;
 	unsigned char MaxStackSize;
 	uint32_t* Code;
-	void* Constants;
+	ConstantType* Constants;
 	Upvalue* Upvalues;
 	struct Prototype* Protos;
 	uint32_t* LineInfo;
@@ -56,7 +64,7 @@ typedef struct {
 #define LUAC_FORMAT 0
 #define LUAC_DATA "\x19\x93\r\n\x1a\n"
 #define CINT_SIZE 4
-#define CSIZET_SIZE 8
+#define CSIZET_SIZE 4
 #define INSTRUCTION_SIZE 4
 #define LUA_INTEGER_SIZE 8
 #define LUA_NUMBER_SIZE 8
@@ -76,21 +84,11 @@ CBuffer BinaryChunkReadString();
 
 bool BinaryChunkCheckHead();
 
-uint32_t* BinaryChunkReadCode();
+uint8_t BinaryChunkReadByte();
 
-void BinaryChunkReadConstant();
+uint64_t BinaryChunkReadLuaInteger();
 
-void* BinaryChunkReadConstants();
-
-Upvalue* BinaryChunkReadUpvalues();
-
-Prototype* BinaryChunkReadProtos();
-
-uint32_t* BinaryChunkReadLineInfo();
-
-LocVar* BinaryChunkReadLocVars();
-
-CBuffer* BinaryChunkReadUpvalueNames();
+double BinaryChunkReadLuaNumber();
 
 Prototype* BinaryChunkReadProto();
 

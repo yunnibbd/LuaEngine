@@ -6,6 +6,8 @@ typedef void* CBuffer;
 
 CBuffer CBufferAlloc(int size);
 
+CBuffer CBufferFromStr(char* data, int data_size);
+
 void CBufferFree(CBuffer buffer);
 
 char* CBufferData(CBuffer buffer);

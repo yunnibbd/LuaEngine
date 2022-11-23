@@ -1,19 +1,41 @@
 #include <stdio.h>
 #include "./BinChunk/binary_chunk.h"
-#include "cbuffer.h"
-#include <string.h>
-#include <windows.h>
+#include "utils.h"
 
-int main() {
-	CBuffer buffer = CBufferAlloc(1024);
-	CBufferPush(buffer, LUA_SIGNATURE, strlen(LUA_SIGNATURE));
-	unsigned char luac_version = LUAC_VERSION;
-	CBufferPush(buffer, &luac_version, sizeof(LUAC_VERSION));
+void PrintHeader(Prototype* proto) {
+	const char* func_type = "main";
+	if (proto->LineDefined > 0) {
+		func_type = "function";
+	}
 
-	BinaryChunkInit(buffer);
-	BinaryChunkCheckHead();
+	const char* vararg_flag = "";
+	if (proto->IsVararg > 0) {
+		vararg_flag = "+";
+	}
 
-	CBufferFree(buffer);
-	system("pause");
+	printf("\n%s <%s:%d,%d> (%d instructions)\n", func_type, proto->Source, proto->LineDefined, proto->LastLineDefined, proto->MaxStackSize);
+}
+
+void PrintCode(Prototype* proto) {
+
+}
+
+void PrintDetail(Prototype* proto) {
+
+}
+
+int main(int argc, const char* const* argv) {
+	//if (argc > 1) {
+		//const char* file_name = argv[1];
+		const char* file_name = "luac.out";
+		CBuffer buffer = LoadFileContentToCBuffer(file_name);
+		if (buffer != NULL) {
+			BinaryChunkInit(buffer);
+			BinaryChunkReadByte();
+			Prototype* proto = BinaryChunkReadProto();
+			PrintHeader(proto);
+			printf("hello yunni\n");
+		}
+	//}
 	return 0;
 }
