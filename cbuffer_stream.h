@@ -2,30 +2,27 @@
 #define __C_BUFFER_STREAM_H__
 #include <stdbool.h>
 #include <inttypes.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "cbuffer.h"
 
 typedef void* CBufferStream;
 
 CBufferStream CBufferStreamAlloc(int size);
 
-CBufferStream CBufferStreamFromCBuffer(CBuffer buffer);
+CBufferStream CBufferStreamAllocFromCBuffer(CBuffer buffer);
 
 void CBufferStreamFree(CBufferStream buffer_stream);
 
 char* CBufferStreamData(CBufferStream buffer_stream);
 
-int CBufferStreamLength(CBufferStream buffer_stream);
+int CBufferStreamSize(CBufferStream buffer_stream);
+
+bool CBufferStreamRead(CBufferStream buffer_stream, void* buffer, int buffer_size);
+
+bool CBufferStreamPeep(CBufferStream buffer_stream, void* buffer, int buffer_size);
 
 bool CBufferStreamReadToCBuffer(CBufferStream buffer_stream, CBuffer buffer);
 
-bool CBufferStreamRead(CBufferStream buffer_stream, void* buffer, int buffer_len);
-
-bool CBufferStreamPeep(CBufferStream buffer_stream, char* buffer, int buffer_len);
-
-bool CBufferStreamWrite(CBufferStream buffer_stream, void* buffer, int buffer_len);
+bool CBufferStreamWrite(CBufferStream buffer_stream, void* buffer, int buffer_size);
 
 int8_t CBufferStreamReadInt8(CBufferStream buffer_stream);
 

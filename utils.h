@@ -4,6 +4,6 @@
 
 char* LoadFileContent(const char* file_name);
 
-CBuffer LoadFileContentToCBuffer(const char* file_name);
+CBuffer LoadFromToCBuffer(const char* file_name);
 
 #endif

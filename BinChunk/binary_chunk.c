@@ -7,25 +7,34 @@
 
 static CBufferStream buffer_stream;
 
-static uint32_t* BinaryChunkReadCode();
+static void BinaryChunkInit(CBuffer buffer);
+static CBuffer BinaryChunkReadString();
+static CVector BinaryChunkReadCode();
 static ConstantType BinaryChunkReadConstant();
-static ConstantType* BinaryChunkReadConstants();
-static Upvalue* BinaryChunkReadUpvalues();
-static Prototype* BinaryChunkReadProtos();
-static uint32_t* BinaryChunkReadLineInfo();
-static LocVar* BinaryChunkReadLocVars();
-static CBuffer* BinaryChunkReadUpvalueNames();
+static CVector BinaryChunkReadConstants();
+static CVector BinaryChunkReadUpvalues();
+static CVector BinaryChunkReadProtos(CBuffer parent);
+static CVector BinaryChunkReadLineInfos();
+static CVector BinaryChunkReadLocVars();
+static CVector BinaryChunkReadUpvalueNames();
+static Prototype* BinaryChunkReadProto(CBuffer parent);
 
-void BinaryChunkInit(CBuffer buffer) {
-	assert(buffer_stream == NULL);
-	buffer_stream = CBufferStreamFromCBuffer(buffer);
+
+Prototype* BinaryChunkUnDump(CBuffer buffer) {
+	BinaryChunkInit(buffer);
 	if (!BinaryChunkCheckHead()) {
-		printf("parse error");
-		abort();
+		exit(-1);
 	}
+	BinaryChunkReadByte();
+	return BinaryChunkReadProto(NULL);
 }
 
-CBuffer BinaryChunkReadString() {
+static void BinaryChunkInit(CBuffer buffer) {
+	assert(buffer_stream == NULL);
+	buffer_stream = CBufferStreamAllocFromCBuffer(buffer);
+}
+
+static CBuffer BinaryChunkReadString() {
 	assert(buffer_stream != NULL);
 	uint64_t len = CBufferStreamReadUInt8(buffer_stream);
 	if (len == 0) {
@@ -37,8 +46,8 @@ CBuffer BinaryChunkReadString() {
 	}
 	
 	buffer = CBufferAlloc((int)len - 1);
-	CBufferStreamRead(buffer_stream, buffer, (int)len - 1);
-
+	CBufferStreamRead(buffer_stream, CBufferData(buffer), (int)len - 1);
+	CBufferSetDataSize(buffer, len - 1);
 	return  buffer;
 }
 
@@ -49,53 +58,245 @@ bool BinaryChunkCheckHead() {
 		int buffer_len = strlen(LUA_SIGNATURE);
 		CBufferStreamRead(buffer_stream, buffer, buffer_len);
 		if (strncmp(buffer, LUA_SIGNATURE, buffer_len) != 0) {
+			printf("LUA_SIGNATURE error");
 			break;
 		}
 
 		if (CBufferStreamReadUInt8(buffer_stream) != LUAC_VERSION) {
+			printf("LUAC_VERSION error");
 			break;
 		}
 
 		if (CBufferStreamReadUInt8(buffer_stream) != LUAC_FORMAT) {
+			printf("LUAC_FORMAT error");
 			break;
 		}
 
 		buffer_len = strlen(LUAC_DATA);
 		CBufferStreamRead(buffer_stream, buffer, buffer_len);
 		if (strncmp(buffer, LUAC_DATA, buffer_len) != 0) {
+			printf("LUAC_DATA error");
 			break;
 		}
 
 		if (CBufferStreamReadUInt8(buffer_stream) != CINT_SIZE) {
+			printf("CINT_SIZE error");
 			break;
 		}
 
 		if (CBufferStreamReadUInt8(buffer_stream) != CSIZET_SIZE) {
+			printf("CSIZET_SIZE error");
 			break;
 		}
 
 		if (CBufferStreamReadUInt8(buffer_stream) != INSTRUCTION_SIZE) {
+			printf("INSTRUCTION_SIZE error");
 			break;
 		}
 
 		if (CBufferStreamReadUInt8(buffer_stream) != LUA_INTEGER_SIZE) {
+			printf("LUA_INTEGER_SIZE error");
 			break;
 		}
 
 		if (CBufferStreamReadUInt8(buffer_stream) != LUA_NUMBER_SIZE) {
+			printf("LUA_NUMBER_SIZE error");
 			break;
 		}
 
 		if (CBufferStreamReadInt64(buffer_stream) != LUAC_INT) {
+			printf("LUAC_INT error");
 			break;
 		}
 
 		if (CBufferStreamReadDouble(buffer_stream) != LUAC_NUM) {
+			printf("LUAC_NUM error");
 			break;
 		}
 		return true;
 	} while (0);
 	return false;
+}
+
+static void CodeCopyFunc(void* addr, uint32_t* element) {
+	*(uint32_t*)addr = *element;
+}
+
+static CVector BinaryChunkReadCode() {
+	uint32_t code_element_len = CBufferStreamReadUInt32(buffer_stream);
+	CVector codes = CVectorAlloc(code_element_len, sizeof(uint32_t), NULL, NULL, CodeCopyFunc);
+	uint32_t temp;
+	for (int i = 0; i < code_element_len; ++i) {
+		temp = CBufferStreamReadUInt32(buffer_stream);
+		CVectorPushBack(codes, &temp);
+	}
+	return codes;
+}
+
+static ConstantType BinaryChunkReadConstant() {
+	uint8_t tag = CBufferStreamReadUInt8(buffer_stream);
+	ConstantType type;
+	switch (tag){
+	case TAG_NIL:
+		type.tag = CONSTANT_TAG_NIL;
+		type.data.tag_nil = 0;
+		break;
+	case TAG_BOOLEAN:
+		type.tag = CONSTANT_TAG_BOOLEAN;
+		type.data.tag_boolean = (CBufferStreamReadUInt8(buffer_stream) != 0);
+		break;
+	case TAG_INTEGER:
+		type.tag = CONSTANT_TAG_INTEGER;
+		type.data.tag_integer = CBufferStreamReadUInt64(buffer_stream);
+		break;
+	case TAG_NUMBER:
+		type.tag = CONSTANT_TAG_NUMBER;
+		type.data.tag_number = CBufferStreamReadDouble(buffer_stream);
+		break;
+	case TAG_SHORT_STR:
+	case TAG_LONG_STR:
+		type.tag = CONSTANT_TAG_STR;
+		type.data.tag_str = BinaryChunkReadString();
+		break;
+	default:
+		assert(0);
+		break;
+	}
+	return type;
+}
+
+static ConstantCopyFunc(void* addr, ConstantType* constant) {
+	memcpy(addr, constant, sizeof(ConstantType));
+}
+
+static ConstantFreeFunc(ConstantType* constant) {
+	switch (constant->tag){
+	case CONSTANT_TAG_STR:
+		CBufferFree(constant->data.tag_str);
+		break;
+	}
+}
+
+static CVector BinaryChunkReadConstants() {
+	uint32_t constant_element_len = CBufferStreamReadUInt32(buffer_stream);
+	CVector constants = CVectorAlloc(constant_element_len, sizeof(ConstantType), ConstantFreeFunc, NULL, ConstantCopyFunc);
+	ConstantType temp;
+	for (size_t i = 0; i < constant_element_len; ++i) {
+		temp = BinaryChunkReadConstant();
+		CVectorPushBack(constants, &temp);
+	}
+	return constants;
+}
+
+static void UpvalueCopyFunc(void* addr, Upvalue* constant) {
+	memcpy(addr, constant, sizeof(Upvalue));
+}
+
+static CVector BinaryChunkReadUpvalues() {
+	uint32_t upvalue_element_len = CBufferStreamReadUInt32(buffer_stream);
+	CVector upvalues = CVectorAlloc(upvalue_element_len, sizeof(Upvalue), NULL, NULL, UpvalueCopyFunc);
+	Upvalue temp;
+	for (size_t i = 0; i < upvalue_element_len; ++i) {
+		temp.Instack = BinaryChunkReadByte();
+		temp.Idx = BinaryChunkReadByte();
+		CVectorPushBack(upvalues, &temp);
+	}
+	return upvalues;
+}
+
+static void ProtosCopyFunc(void* addr, Prototype** val) {
+	memcpy(addr, *val, sizeof(Prototype*));
+}
+
+static CVector BinaryChunkReadProtos(CBuffer parent) {
+	uint32_t protos_element_len = CBufferStreamReadUInt32(buffer_stream);
+	if (protos_element_len == 0) {
+		return NULL;
+	}
+	CVector protos = CVectorAlloc(sizeof(Prototype*), sizeof(Prototype), NULL, NULL, ProtosCopyFunc);
+	Prototype* proto;
+	for (size_t i = 0; i < protos_element_len; ++i) {
+		proto = BinaryChunkReadProto(parent);
+		CVectorPushBack(protos, &proto);
+	}
+	return protos;
+}
+
+static LineinfosCopyFunc(void* addr, uint32_t* val) {
+	memcpy(addr, val, sizeof(uint32_t));
+}
+
+static CVector BinaryChunkReadLineInfos() {
+	uint32_t lineinfo_element_len = CBufferStreamReadUInt32(buffer_stream);
+	CVector lineinfos = CVectorAlloc(lineinfo_element_len, sizeof(uint32_t), NULL, NULL, LineinfosCopyFunc);
+	uint32_t temp;
+	for (size_t i = 0; i < lineinfo_element_len; ++i) {
+		temp = CBufferStreamReadUInt32(buffer_stream);
+		CVectorPushBack(lineinfos, &temp);
+	}
+	return lineinfos;
+}
+
+static LocvarFreeFunc(LocVar* val) {
+	CBufferFree(val->VarName);
+}
+
+static LocvarCopyFunc(void* addr, LocVar* val) {
+	memcpy(addr, val, sizeof(LocVar));
+}
+
+static CVector BinaryChunkReadLocVars() {
+	uint32_t locvar_element_len = CBufferStreamReadUInt32(buffer_stream);
+	CVector locvars = CVectorAlloc(locvar_element_len, sizeof(LocVar), LocvarFreeFunc, NULL, LocvarCopyFunc);
+	LocVar temp;
+	for (size_t i = 0; i < locvar_element_len; ++i) {
+		temp.VarName = BinaryChunkReadString();
+		temp.StartPC = CBufferStreamReadUInt32(buffer_stream);
+		temp.EndPC = CBufferStreamReadUInt32(buffer_stream);
+		CVectorPushBack(locvars, &temp);
+	}
+	return locvars;
+}
+
+static void UpvalueNamesFreeFunc(CBuffer val) {
+	CBufferFree(val);
+}
+
+static void UpvalueNamesCopyFunc(void* addr, CBuffer val) {
+	CBufferCopy(addr, val);
+}
+
+static CVector BinaryChunkReadUpvalueNames() {
+	uint32_t upvaluenames_element_len = CBufferStreamReadUInt32(buffer_stream);
+	CVector upvaluenames = CVectorAlloc(upvaluenames_element_len, sizeof(CBuffer), UpvalueNamesFreeFunc, NULL, UpvalueNamesCopyFunc);
+	CBuffer temp;
+	for (size_t i = 0; i < upvaluenames_element_len; ++i) {
+		temp = BinaryChunkReadString();
+		CVectorPushBack(upvaluenames, temp);
+	}
+	return upvaluenames;
+}
+
+static Prototype* BinaryChunkReadProto(CBuffer parent) {
+	CBuffer source = BinaryChunkReadString();
+	if (source == NULL) {
+		source = parent;
+	}
+	Prototype* proto = malloc(sizeof(Prototype));
+	proto->Source = source;
+	proto->LineDefined = CBufferStreamReadUInt32(buffer_stream);
+	proto->LastLineDefined = CBufferStreamReadUInt32(buffer_stream);
+	proto->NumParams = CBufferStreamReadUInt8(buffer_stream);
+	proto->IsVararg = CBufferStreamReadUInt8(buffer_stream);
+	proto->MaxStackSize = CBufferStreamReadUInt8(buffer_stream);
+	proto->Code = BinaryChunkReadCode();
+	proto->Constants = BinaryChunkReadConstants();
+	proto->Upvalues = BinaryChunkReadUpvalues();
+	proto->Protos = BinaryChunkReadProtos(source);
+	proto->LineInfo = BinaryChunkReadLineInfos();
+	proto->LocVars = BinaryChunkReadLocVars();
+	proto->UpvalueNames = BinaryChunkReadUpvalueNames();
+	return proto;
 }
 
 uint8_t BinaryChunkReadByte() {
@@ -108,117 +309,4 @@ uint64_t BinaryChunkReadLuaInteger() {
 
 double BinaryChunkReadLuaNumber() {
 	return CBufferStreamReadDouble(buffer_stream);
-}
-
-Prototype* BinaryChunkReadProto() {
-	Prototype* proto = malloc(sizeof(Prototype));
-	proto->Source = BinaryChunkReadString();
-	proto->LineDefined = CBufferStreamReadUInt32(buffer_stream);
-	proto->LastLineDefined = CBufferStreamReadUInt32(buffer_stream);
-	proto->NumParams = CBufferStreamReadUInt8(buffer_stream);
-	proto->IsVararg = CBufferStreamReadUInt8(buffer_stream);
-	proto->MaxStackSize = CBufferStreamReadUInt8(buffer_stream);
-	proto->Code = BinaryChunkReadCode();
-	proto->Constants = BinaryChunkReadConstants();
-	proto->Upvalues = BinaryChunkReadUpvalues();
-	proto->Protos = BinaryChunkReadProtos();
-	proto->LineInfo = BinaryChunkReadLineInfo();
-	proto->LocVars = BinaryChunkReadLocVars();
-	proto->UpvalueNames = BinaryChunkReadUpvalueNames();
-	return proto;
-}
-
-static uint32_t* BinaryChunkReadCode() {
-	uint32_t code_element_len = CBufferStreamReadUInt32(buffer_stream);
-	//TODO ×¢ÒâÄÚ´æÊÍ·Å
-	size_t code_len = sizeof(uint32_t) * code_element_len;
-	uint32_t* code = malloc(code_len);
-	CBufferStreamRead(buffer_stream, code, code_len);
-	return code;
-}
-
-static ConstantType BinaryChunkReadConstant() {
-	uint8_t tag = CBufferStreamReadUInt8(buffer_stream);
-	ConstantType type;
-	switch (tag){
-	case TAG_NIL:
-		type.tag_nil = 0;
-		break;
-	case TAG_BOOLEAN:
-		type.tag_boolean = CBufferStreamReadUInt8(buffer_stream) != 0;
-		break;
-	case TAG_INTEGER:
-		type.tag_integer = CBufferStreamReadUInt64(buffer_stream);
-		break;
-	case TAG_NUMBER:
-		type.tag_number = CBufferStreamReadDouble(buffer_stream);
-		break;
-	case TAG_SHORT_STR:
-	case TAG_LONG_STR:
-		type.tag_str = BinaryChunkReadString();
-		break;
-	default:
-		assert(0);
-		break;
-	}
-	return type;
-}
-
-static ConstantType* BinaryChunkReadConstants() {
-	uint32_t constant_element_len = CBufferStreamReadUInt32(buffer_stream);
-	size_t constants_len = sizeof(ConstantType) * constant_element_len;
-	ConstantType* constants = malloc(constants_len);
-	for (size_t i = 0; i < constant_element_len; ++i) {
-		ConstantType* cur = constants++;
-		*cur = BinaryChunkReadConstant();
-	}
-	return constants;
-}
-
-static Upvalue* BinaryChunkReadUpvalues() {
-	uint32_t upvalue_element_len = CBufferStreamReadUInt32(buffer_stream);
-	size_t upvalue_len = sizeof(Upvalue) * upvalue_element_len;
-	Upvalue* upvalues = malloc(upvalue_len);
-	CBufferStreamRead(buffer_stream, upvalues, upvalue_len);
-	return upvalues;
-}
-
-static Prototype* BinaryChunkReadProtos() {
-	uint32_t protos_element_len = CBufferStreamReadUInt32(buffer_stream);
-	size_t proto_len = sizeof(Prototype) * protos_element_len;
-	Prototype* protos = malloc(proto_len);
-	CBufferStreamRead(buffer_stream, protos, proto_len);
-	return protos;
-}
-
-static uint32_t* BinaryChunkReadLineInfo() {
-	uint32_t lineInfo_element_len = CBufferStreamReadUInt32(buffer_stream);
-	size_t lineInfo_len = sizeof(uint32_t) * lineInfo_element_len;
-	uint32_t* lineInfos = malloc(lineInfo_len);
-	CBufferStreamRead(buffer_stream, lineInfos, lineInfo_len);
-	return lineInfos;
-}
-
-static LocVar* BinaryChunkReadLocVars() {
-	uint32_t locvar_element_len = CBufferStreamReadUInt32(buffer_stream);
-	size_t locvar_len = sizeof(LocVar) * locvar_element_len;
-	LocVar* locvars = malloc(locvar_len);
-	for (size_t i = 0; i < locvar_len; ++i) {
-		LocVar* cur = locvars++;
-		cur->VarName = BinaryChunkReadString();
-		cur->StartPC = CBufferStreamReadUInt32(buffer_stream);
-		cur->EndPC = CBufferStreamReadUInt32(buffer_stream);
-	}
-	return locvars;
-}
-
-static CBuffer* BinaryChunkReadUpvalueNames() {
-	uint32_t upvaluenames_element_size = CBufferStreamReadUInt32(buffer_stream);
-	size_t upvaluenames_len = sizeof(CBuffer) * upvaluenames_element_size;
-	CBuffer* upvaluenames = malloc(upvaluenames_len);
-	for (size_t i = 0; i < upvaluenames_len; ++i) {
-		CBuffer* cur = upvaluenames++;
-		*cur = BinaryChunkReadString();
-	}
-	return upvaluenames;
 }

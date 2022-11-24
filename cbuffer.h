@@ -6,15 +6,25 @@ typedef void* CBuffer;
 
 CBuffer CBufferAlloc(int size);
 
-CBuffer CBufferFromStr(char* data, int data_size);
+CBuffer CBufferFromCBuffer(CBuffer buffer);
+
+CBuffer CBufferAllocFromCBuffer(CBuffer buffer);
+
+CBuffer CBufferFromStr(const char* data, int data_size);
 
 void CBufferFree(CBuffer buffer);
+
+void CBufferCopy(CBuffer dst, CBuffer src);
 
 char* CBufferData(CBuffer buffer);
 
 int CBufferSize(CBuffer buffer);
 
-bool CBufferPush(CBuffer buffer, const char* data, int size);
+void CBufferSetDataSize(CBuffer buffer, int size);
+
+int CBufferDataSize(CBuffer buffer);
+
+bool CBufferPush(CBuffer buffer, const char* data, int data_size);
 
 void CBufferPop(CBuffer buffer, int size);
 

@@ -1,15 +1,15 @@
-#include <math.h>
-#include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
-typedef struct{
+typedef struct {
 	int size_;
 	char* data_;
 	int write_pos_;
 	int read_pos_;
-}*CBufferStream, StructCBufferStream;
+} *CBufferStream, StructCBufferStream;
 
 typedef struct {
 	int size_;
@@ -25,27 +25,27 @@ typedef struct {
 
 #define BUFFER_STREAM_POP(pStream, len) (pStream->read_pos_ += len)
 
-CBufferStream CBufferStreamAlloc(int size){
+CBufferStream CBufferStreamAlloc(int size) {
 	CBufferStream buffer_stream = malloc(sizeof(StructCBufferStream));
 	buffer_stream->size_ = size;
 	buffer_stream->data_ = malloc(sizeof(char) * size);
 	buffer_stream->write_pos_ = 0;
 	buffer_stream->read_pos_ = 0;
-
 	return buffer_stream;
 }
 
-CBufferStream CBufferStreamFromCBuffer(CBuffer buffer) {
+CBufferStream CBufferStreamAllocFromCBuffer(CBuffer buffer) {
 	CBufferStream buffer_stream = malloc(sizeof(StructCBufferStream));
-	buffer_stream->data_ = buffer->data_;
 	buffer_stream->size_ = buffer->size_;
+	buffer_stream->data_ = buffer->data_;
+	buffer_stream->write_pos_ = 0;
 	buffer_stream->read_pos_ = 0;
 	buffer_stream->write_pos_ = buffer->data_size_;
 	buffer->data_ = NULL;
 	return buffer_stream;
 }
 
-void CBufferStreamFree(CBufferStream buffer_stream){
+void CBufferStreamFree(CBufferStream buffer_stream) {
 	if (buffer_stream != NULL) {
 		if (buffer_stream->data_ != NULL) {
 			free(buffer_stream->data_);
@@ -59,22 +59,22 @@ char* CBufferStreamData(CBufferStream buffer_stream) {
 	return buffer_stream->data_;
 }
 
-int CBufferStreamLength(CBufferStream buffer_stream) {
+int CBufferStreamSize(CBufferStream buffer_stream) {
 	return buffer_stream->size_;
 }
 
-bool CBufferStreamRead(CBufferStream buffer_stream, void* buffer, int buffer_len) {
-	if (BUFFER_STREAM_CAN_READ(buffer_stream, buffer_len)) {
-		memcpy(buffer, buffer_stream->data_ + buffer_stream->read_pos_, buffer_len);
-		BUFFER_STREAM_POP(buffer_stream, buffer_len);
+bool CBufferStreamRead(CBufferStream buffer_stream, void* buffer, int buffer_size) {
+	if (BUFFER_STREAM_CAN_READ(buffer_stream, buffer_size)) {
+		memcpy(buffer, buffer_stream->data_ + buffer_stream->read_pos_, buffer_size);
+		BUFFER_STREAM_POP(buffer_stream, buffer_size);
 		return true;
 	}
 	return false;
 }
 
-bool CBufferStreamPeep(CBufferStream buffer_stream, char* buffer, int buffer_len) {
-	if (BUFFER_STREAM_CAN_READ(buffer_stream, buffer_len)) {
-		memcpy(buffer, buffer_stream->data_ + buffer_stream->read_pos_, buffer_len);
+bool CBufferStreamPeep(CBufferStream buffer_stream, void* buffer, int buffer_size) {
+	if (BUFFER_STREAM_CAN_READ(buffer_stream, buffer_size)) {
+		memcpy(buffer_stream->data_ + buffer_stream->read_pos_, buffer, buffer_size);
 		return true;
 	}
 	return false;
@@ -84,16 +84,16 @@ bool CBufferStreamReadToCBuffer(CBufferStream buffer_stream, CBuffer buffer) {
 	return CBufferStreamRead(buffer_stream, buffer->data_, buffer->size_);
 }
 
-bool CBufferStreamWrite(CBufferStream buffer_stream, void* buffer, int buffer_len) {
-	if (BUFFER_STREAM_CAN_WRITE(buffer_stream, buffer_len)) {
-		memcpy(buffer_stream->data_ + buffer_stream->write_pos_, buffer, buffer_len);
-		BUFFER_STREAM_PUSH(buffer_stream, buffer_len);
+bool CBufferStreamWrite(CBufferStream buffer_stream, void* buffer, int buffer_size) {
+	if (BUFFER_STREAM_CAN_WRITE(buffer_stream, buffer_size)) {
+		memcpy(buffer_stream->data_ + buffer_stream->write_pos_, buffer, buffer_size);
+		BUFFER_STREAM_PUSH(buffer_stream, buffer_size);
 		return true;
 	}
 	return false;
 }
 
-int8_t CBufferStreamReadInt8(CBufferStream buffer_stream) {
+int8_t CBufferStreamReadInt8(CBufferStream buffer_stream){
 	int8_t ret = 0;
 	CBufferStreamRead(buffer_stream, &ret, sizeof(ret));
 	return ret;
@@ -116,7 +116,6 @@ int64_t CBufferStreamReadInt64(CBufferStream buffer_stream) {
 	CBufferStreamRead(buffer_stream, &ret, sizeof(ret));
 	return ret;
 }
-
 
 uint8_t CBufferStreamReadUInt8(CBufferStream buffer_stream) {
 	uint8_t ret = 0;

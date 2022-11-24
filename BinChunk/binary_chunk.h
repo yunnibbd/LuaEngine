@@ -2,6 +2,7 @@
 #define __BINARY_CHUNK_H__
 #include <inttypes.h>
 #include "../cbuffer.h"
+#include "../cvector.h"
 #include <stdbool.h>
 
 typedef struct {
@@ -29,13 +30,21 @@ typedef struct {
 	double luacNum;
 } Header;
 
-typedef union{
-	uint8_t tag_nil;
-	uint8_t tag_boolean;
-	uint64_t tag_integer;
-	double tag_number;
-	CBuffer tag_str;
-} ConstantType;
+enum ConstantTypeTag {
+	CONSTANT_TAG_NIL, CONSTANT_TAG_BOOLEAN, CONSTANT_TAG_INTEGER, CONSTANT_TAG_NUMBER, CONSTANT_TAG_STR,
+};
+
+typedef struct {
+	union {
+		uint8_t tag_nil;
+		uint8_t tag_boolean;
+		uint64_t tag_integer;
+		double tag_number;
+		CBuffer tag_str;
+	} data;
+
+	enum ConstantTypeTag tag;
+}ConstantType;
 
 typedef struct Prototype {
 	CBuffer Source;
@@ -44,13 +53,13 @@ typedef struct Prototype {
 	unsigned char NumParams;
 	unsigned char IsVararg;
 	unsigned char MaxStackSize;
-	uint32_t* Code;
-	ConstantType* Constants;
-	Upvalue* Upvalues;
-	struct Prototype* Protos;
-	uint32_t* LineInfo;
-	LocVar* LocVars;
-	CBuffer* UpvalueNames;
+	CVector Code; //uint32_t
+	CVector Constants; //ConstantType
+	CVector Upvalues; //Upvalue
+	CVector Protos; //struct Prototype
+	CVector LineInfo; //uint32_t
+	CVector LocVars; //LocVar
+	CVector UpvalueNames; //CBuffer
 } Prototype;
 
 typedef struct {
@@ -78,18 +87,14 @@ typedef struct {
 #define TAG_SHORT_STR 0x04
 #define TAG_LONG_STR 0x14
 
-void BinaryChunkInit(CBuffer buffer);
-
-CBuffer BinaryChunkReadString();
-
 bool BinaryChunkCheckHead();
+
+Prototype* BinaryChunkUnDump(CBuffer buffer);
 
 uint8_t BinaryChunkReadByte();
 
 uint64_t BinaryChunkReadLuaInteger();
 
 double BinaryChunkReadLuaNumber();
-
-Prototype* BinaryChunkReadProto();
 
 #endif

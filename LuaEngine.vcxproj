@@ -127,6 +127,7 @@
     <ClCompile Include="BinChunk\binary_chunk.c" />
     <ClCompile Include="cbuffer.c" />
     <ClCompile Include="cbuffer_stream.c" />
+    <ClCompile Include="cvector.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="utils.c" />
   </ItemGroup>
@@ -134,6 +135,7 @@
     <ClInclude Include="BinChunk\binary_chunk.h" />
     <ClInclude Include="cbuffer.h" />
     <ClInclude Include="cbuffer_stream.h" />
+    <ClInclude Include="cvector.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
