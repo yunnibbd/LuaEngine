@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "./BinChunk/binary_chunk.h"
+#include "binary_chunk.h"
 #include "cbuffer.h"
 #include "cvector.h"
 #include "utils.h"
@@ -41,24 +41,24 @@ void PrintCode(Prototype* proto) {
 
 void PrintConstant(ConstantType* constant, int i) {
 	switch (constant->tag){
-	case CONSTANT_TAG_NIL:
-		printf("\t%d\t%s\n", i + 1, "nil");
-		break;
-	case CONSTANT_TAG_BOOLEAN:
-		printf("\t%d\t%s\n", i + 1, constant->data.tag_boolean == 0 ? "false" : "true");
-		break;
-	case CONSTANT_TAG_NUMBER:
-		printf("\t%d\t%lf\n", i + 1, constant->data.tag_number);
-		break;
-	case CONSTANT_TAG_INTEGER:
-		printf("\t%d\t%d\n", i + 1, constant->data.tag_integer);
-		break;
-	case CONSTANT_TAG_STR: {
-		char buffer[1024] = { 0 };
-		memcpy(buffer, CBufferData(constant->data.tag_str), CBufferDataSize(constant->data.tag_str));
-		printf("\t%d\t%s\n", i + 1, buffer);
-		break;
-	}
+		case CONSTANT_TAG_NIL:
+			printf("\t%d\t%s\n", i + 1, "nil");
+			break;
+		case CONSTANT_TAG_BOOLEAN:
+			printf("\t%d\t%s\n", i + 1, constant->data.tag_boolean == 0 ? "false" : "true");
+			break;
+		case CONSTANT_TAG_NUMBER:
+			printf("\t%d\t%lf\n", i + 1, constant->data.tag_number);
+			break;
+		case CONSTANT_TAG_INTEGER:
+			printf("\t%d\t%d\n", i + 1, constant->data.tag_integer);
+			break;
+		case CONSTANT_TAG_STR: {
+			char buffer[1024] = { 0 };
+			memcpy(buffer, CBufferData(constant->data.tag_str), CBufferDataSize(constant->data.tag_str));
+			printf("\t%d\t%s\n", i + 1, buffer);
+			break;
+		}
 	}
 }
 
