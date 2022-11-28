@@ -47,12 +47,15 @@ void CVectorFree(CVector vector) {
 	}
 }
 
+void CVectorGrow(CVector vector) {
+	vector->vector_size_ *= 2;
+	vector->vector_root_ = realloc(vector->vector_root_, vector->vector_item_size_ * vector->vector_size_);
+	assert(vector->vector_root_ != NULL);
+}
+
 bool CVectorPushBack(CVector vector, void* data) {
 	if (vector->vector_data_size_ >= vector->vector_size_) {
-		vector->vector_size_ *= 2;
-		vector->vector_root_ = realloc(vector->vector_root_, vector->vector_item_size_ * vector->vector_size_);
-		assert(vector->vector_root_ != NULL);
-		return false;
+		CVectorGrow(vector);
 	}
 	char* dst_addr = ((char*)vector->vector_root_) + vector->vector_item_size_ * vector->vector_data_size_;
 	vector->copy_func_(dst_addr, data);

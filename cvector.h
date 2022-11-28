@@ -12,6 +12,8 @@ typedef void(*CopyFuncType)(void* dst_addr, void* element);
 
 CVector CVectorAlloc(int vector_size, int vector_item_size, FreeFuncType free_func, CompareFuncType compare_func, CopyFuncType copy_func);
 
+void CVectorGrow(CVector vector);
+
 void CVectorFree(CVector vector);
 
 bool CVectorPushBack(CVector vector, void* data);

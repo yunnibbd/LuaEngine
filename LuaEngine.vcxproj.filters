@@ -33,6 +33,9 @@
     <ClCompile Include="binary_chunk.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="lua_stack.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cbuffer_stream.h">
@@ -54,6 +57,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="instruction.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_value.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_stack.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
