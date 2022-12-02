@@ -128,17 +128,17 @@ void PrintCode(Prototype* proto) {
 	int len = CVectorSize(codes);
 	bool flag = CVectorSize(proto->LineInfo) > 0;
 	for (int i = 0; i < len; ++i) {
-		 uint32_t* val = CVectorGet(codes, i);
-		 uint32_t* line = CVectorGet(proto->LineInfo, i);
-		 Instruction instruction = *val;
-		 if (flag) {
-			 printf("\t%d\t[%d]\t%s \t", i + 1, *line, OpName(instruction));
-		 }
-		 else {
-			 printf("\t%d\t[-]\t%s \t", i + 1, *line, OpName(instruction));
-		 }
-		 PrintOperands(instruction);
-		 printf("\n");
+		uint32_t** val = CVectorGet(codes, i);
+		uint32_t** line = CVectorGet(proto->LineInfo, i);
+		Instruction instruction = **val;
+		if (flag) {
+			printf("\t%d\t[%d]\t%s \t", i + 1, **line, OpName(instruction));
+		}
+		else {
+			printf("\t%d\t[-]\t%s \t", i + 1, **line, OpName(instruction));
+		}
+		PrintOperands(instruction);
+		printf("\n");
 	}
 }
 
@@ -170,7 +170,7 @@ void PrintDetail(Prototype* proto) {
 	printf("constants (%d):\n", CVectorSize(constants));
 	int len = CVectorSize(constants);
 	for (int i = 0; i < len; ++i) {
-		PrintConstant((ConstantType*)CVectorGet(constants, i), i);
+		PrintConstant(*(ConstantType**)CVectorGet(constants, i), i);
 	}
 
 	CVector locvars = proto->LocVars;
@@ -187,13 +187,14 @@ void PrintDetail(Prototype* proto) {
 	CVector upvalName = proto->UpvalueNames;
 	len = CVectorSize(upval);
 	printf("upvalues (%d):\n", len);
+
 	bool flag = CVectorSize(upvalName) > 0;
 	for (int i = 0; i < len; ++i) {
 		Upvalue* cur = CVectorGet(upval, i);
 		if (flag) {
-			CBuffer upname = CVectorGet(upvalName, i);
+			CBuffer** upname = CVectorGet(upvalName, i);
 			char buffer[1024] = { 0 };
-			memcpy(buffer, CBufferData(upname), CBufferDataSize(upname));
+			memcpy(buffer, CBufferData(*upname), CBufferDataSize(*upname));
 			printf("\t%d\t%s\t%d\t%d\n", i, buffer, cur->Instack, cur->Idx);
 		}
 		else {

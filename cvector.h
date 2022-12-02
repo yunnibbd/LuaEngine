@@ -18,6 +18,8 @@ void CVectorFree(CVector vector);
 
 bool CVectorPushBack(CVector vector, void* data);
 
+void CVectorSet(CVector vector, int index, void* data);
+
 void* CVectorGet(CVector vector, int index);
 
 void* CVectorGetLast(CVector vector);

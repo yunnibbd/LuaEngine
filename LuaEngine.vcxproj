@@ -139,6 +139,7 @@
     <ClInclude Include="cvector.h" />
     <ClInclude Include="instruction.h" />
     <ClInclude Include="lua_stack.h" />
+    <ClInclude Include="lua_state.h" />
     <ClInclude Include="lua_value.h" />
     <ClInclude Include="opcodes.h" />
     <ClInclude Include="utils.h" />

@@ -70,6 +70,11 @@ int CVectorSize(CVector vector) {
 	return vector->vector_data_size_;
 }
 
+void CVectorSet(CVector vector, int index, void* data) {
+	char* dst_addr = ((char*)vector->vector_root_) + vector->vector_item_size_ * vector->vector_data_size_;
+	memcpy(dst_addr, data, vector->vector_item_size_);
+}
+
 void* CVectorGet(CVector vector, int index) {
 	if (index >= vector->vector_data_size_) {
 		return NULL;
