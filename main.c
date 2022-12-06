@@ -77,49 +77,49 @@ void PrintHeader(Prototype* proto) {
 }
 
 void PrintOperands(Instruction instruction) {
-	switch (OpMode(instruction)){
-		case IABC: {
-			TABC tabc = ABC(instruction);
-			printf("%d", tabc.a);
-			if (BMode(instruction) != OpArgN) {
-				if (tabc.b > 0xff) {
-					printf(" %d", -1 - tabc.b & 0xff);
-				}
-				else {
-					printf(" %d", tabc.b);
-				}
+	switch (OpMode(instruction)) {
+	case IABC: {
+		TABC tabc = ABC(instruction);
+		printf("%d", tabc.a);
+		if (CMode(instruction) != OpArgN) {
+			if (tabc.c > 0xff) {
+				printf(" %d", -1 - (tabc.c & 0xff));
 			}
-			
-			if (CMode(instruction) != OpArgN) {
-				if (tabc.c > 0xff) {
-					printf(" %d", -1 - tabc.c & 0xff);
-				}
-				else {
-					printf(" %d", tabc.c);
-				}
+			else {
+				printf(" %d", tabc.c);
 			}
-			break;
 		}
-		case IABx: {
-			TABx tabx = ABx(instruction);
-			printf("%d", tabx.a);
-			if (BMode(instruction) == OpArgK) {
-				printf(" %d", -1 - tabx.bx);
+		if (BMode(instruction) != OpArgN) {
+			if (tabc.b > 0xff) {
+				printf(" %d", -1 - (tabc.b & 0xff));
 			}
-			else if(BMode(instruction) == OpArgU) {
-				printf(" %d", tabx.bx);
+			else {
+				printf(" %d", tabc.b);
 			}
-			break;
 		}
-		case IAsBx: {
-			TAsBx tasbx = AsBx(instruction);
-			printf("%d %d", tasbx.a, tasbx.sbx);
-			break;
+		break;
+	}
+	case IABx: {
+		TABx tabx = ABx(instruction);
+		printf("%d", tabx.a);
+		if (BMode(instruction) == OpArgK) {
+			printf(" %d", -1 - tabx.bx);
 		}
-		case IAx: {
-			printf("%d", -1 - Ax(instruction));
-			break;
+		else {
+			printf(" %d", tabx.bx);
 		}
+		break;
+	}
+	case IAsBx: {
+		TAsBx tasbx = AsBx(instruction);
+		printf("%d %d", tasbx.a, tasbx.sbx);
+		break;
+	}
+	case IAx: {
+		int ax = Ax(instruction);
+		printf("%d", ax);
+		break;
+	}
 	}
 }
 
