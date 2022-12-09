@@ -1,4 +1,3 @@
-
 #include "lua_value.h"
 #include "cvector.h"
 #include <stdio.h>
@@ -38,6 +37,11 @@ LuaStack LuaStackAlloc(int size) {
 	lua_stack->slots = CVectorAlloc(size, sizeof(void*), LuaValueFreeFunc, NULL, LuaValueCopyFunc);
 	lua_stack->top = 0;
 	return lua_stack;
+}
+
+void LuaStackFree(LuaStack lua_stack) {
+	CVectorFree(lua_stack->slots);
+	free(lua_stack);
 }
 
 void LuaStackCheck(LuaStack lua_stack, int n) {
@@ -92,7 +96,7 @@ bool LuaStackIsValid(LuaStack lua_stack, int idx) {
 	 return ret;
 }
 
-void LusStackSet(LuaStack lua_stack, int idx, LuaValue lua_value) {
+void LuaStackSet(LuaStack lua_stack, int idx, LuaValue lua_value) {
 	ABSINDEX(idx);
 	if (idx > 0 && idx <= lua_stack->top) {
 		CVectorSet(lua_stack->slots, idx - 1, &lua_value);

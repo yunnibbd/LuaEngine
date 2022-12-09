@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 OpCode g_opcodes[47] = {
-	/*     T  A     B       C    mode    name */
+/*   T  A    B       C     mode    name */
 	{0, 1, OpArgR, OpArgN, IABC,  "MOVE    "},
 	{0, 1, OpArgK, OpArgN, IABx,  "LOADK   "},
 	{0, 1, OpArgN, OpArgN, IABx,  "LOADKX  "},
@@ -57,7 +57,6 @@ OpCode g_opcodes[47] = {
 	{0, 1, OpArgU, OpArgN, IABC,  "VARARG  "},
 	{0, 0, OpArgU, OpArgU, IAx,   "EXTRAARG"},
 };
-
 
 void PrintHeader(Prototype* proto) {
 	const char* func_type = "main";
