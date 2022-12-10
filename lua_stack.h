@@ -9,9 +9,11 @@ LuaStack LuaStackAlloc(int size);
 
 void LuaStackFree(LuaStack lua_stack);
 
+void LuaStackReverse(LuaStack lua_stack, int from, int to);
+
 void LuaStackCheck(LuaStack lua_stack, int n);
 
-void LuaStackPush(LuaStack lua_stack, LuaValue lua_value);
+void LuaStackPush(LuaStack lua_stack, LuaValue* lua_value);
 
 LuaValue LuaStackPop(LuaStack lua_stack);
 

@@ -44,6 +44,14 @@ void LuaStackFree(LuaStack lua_stack) {
 	free(lua_stack);
 }
 
+void LuaStackReverse(LuaStack lua_stack, int from, int to) {
+	while (from < to) {
+		CVectorChange(lua_stack->slots, from, to);
+		++from;
+		--to;
+	}
+}
+
 void LuaStackCheck(LuaStack lua_stack, int n) {
 	int free = CVectorSize(lua_stack->slots) - lua_stack->top;
 	while (free < n) {
@@ -52,12 +60,12 @@ void LuaStackCheck(LuaStack lua_stack, int n) {
 	}
 }
 
-void LuaStackPush(LuaStack lua_stack, LuaValue lua_value) {
+void LuaStackPush(LuaStack lua_stack, LuaValue* lua_value) {
 	if (CVectorSize(lua_stack->slots) == lua_stack->top) {
 		printf("stack overflow!");
 		exit(-1);
 	}
-	CVectorPushBack(lua_stack->slots, &lua_value);
+	CVectorPushBack(lua_stack->slots, lua_value);
 	++lua_stack->top;
 }
 

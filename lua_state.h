@@ -55,7 +55,7 @@ CBuffer LuaStateToString(LuaState lua_state, int idx);
 StringAndBool LuaStateToStringX(LuaState lua_state, int idx);
 /* push functions(Go->stack) */
 void LuaStatePushNil(LuaState lua_state);
-void LuaStatePushBoolean(bool b);
+void LuaStatePushBoolean(LuaState lua_state, bool b);
 void LuaStatePushInteger(LuaState lua_state, int64_t n);
 void LuaStatePushNumber(LuaState lua_state, double n);
 void LuaStatePushString(LuaState lua_state, CBuffer s);

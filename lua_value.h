@@ -8,6 +8,7 @@ enum LuaType {
 	LUA_TNIL,
 	LUA_TBOOLEAN,
 	LUA_TLIGHTUSERDATA,
+	LUA_TINTEGER,
 	LUA_TNUMBER,
 	LUA_TSTRING,
 	LUA_TTABLE,
@@ -27,4 +28,5 @@ typedef struct {
 } LuaValue;
 
 #define TYPEOF(val) val.type
+
 #endif

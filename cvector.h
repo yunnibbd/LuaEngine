@@ -14,6 +14,8 @@ CVector CVectorAlloc(int vector_size, int vector_item_size, FreeFuncType free_fu
 
 void CVectorGrow(CVector vector);
 
+void CVectorChange(CVector vector, int idx1, int idx2);
+
 void CVectorFree(CVector vector);
 
 bool CVectorPushBack(CVector vector, void* data);

@@ -53,6 +53,14 @@ void CVectorGrow(CVector vector) {
 	assert(vector->vector_root_ != NULL);
 }
 
+void CVectorChange(CVector vector, int idx1, int idx2) {
+	//调换两处指针即可
+	void** tp1 = CVectorGet(vector, idx1);
+	void** tp2 = CVectorGet(vector, idx2);
+	CVectorSet(vector, idx1, *tp2);
+	CVectorSet(vector, idx2, *tp1);
+}
+
 bool CVectorPushBack(CVector vector, void* data) {
 	if (vector->vector_data_size_ >= vector->vector_size_) {
 		CVectorGrow(vector);
