@@ -1,6 +1,7 @@
 #ifndef __LUA_VALUE_H__
 #define __LUA_VALUE_H__
 #include <inttypes.h>
+#include <stdbool.h>
 #include "cbuffer.h"
 
 enum LuaType {
@@ -28,5 +29,16 @@ typedef struct {
 } LuaValue;
 
 #define TYPEOF(val) val.type
+
+inline bool LuaValueConvertToBoolean(LuaValue val) {
+	switch (TYPEOF(val)){
+		case LUA_TNIL:
+			return false;
+		case LUA_TBOOLEAN:
+			return val.data.lua_boolean;
+		default:
+			return true;
+	}
+}
 
 #endif

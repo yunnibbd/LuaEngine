@@ -1,9 +1,13 @@
 #ifndef __LUA_STACK_H__
 #define __LUA_STACK_H__
 #include "lua_value.h"
+#include "cvector.h"
 #include <stdbool.h>
 
-typedef void* LuaStack;
+typedef struct {
+	CVector slots; //LuaValue
+	int32_t top;
+} *LuaStack, StructLuaStack;
 
 LuaStack LuaStackAlloc(int size);
 

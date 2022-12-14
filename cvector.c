@@ -1,3 +1,4 @@
+#include "cvector.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,16 +10,6 @@ typedef void(*FreeFuncType)(void* element);
 typedef bool(*CompareFuncType)(void* element, void* element2);
 
 typedef void(*CopyFuncType)(void* dst_addr, void* element);
-
-typedef struct {
-	void* vector_root_;
-	int vector_size_;
-	int vector_data_size_;
-	int vector_item_size_;
-	FreeFuncType free_func_;
-	CompareFuncType compare_func_;
-	CopyFuncType copy_func_;
-} *CVector, StructCVector;
 
 CVector CVectorAlloc(int vector_size, int vector_item_size, FreeFuncType free_func, CompareFuncType compare_func, CopyFuncType copy_func) {
 	CVector vector = malloc(sizeof(StructCVector));
@@ -53,14 +44,6 @@ void CVectorGrow(CVector vector) {
 	assert(vector->vector_root_ != NULL);
 }
 
-void CVectorChange(CVector vector, int idx1, int idx2) {
-	//调换两处指针即可
-	void** tp1 = CVectorGet(vector, idx1);
-	void** tp2 = CVectorGet(vector, idx2);
-	CVectorSet(vector, idx1, *tp2);
-	CVectorSet(vector, idx2, *tp1);
-}
-
 bool CVectorPushBack(CVector vector, void* data) {
 	if (vector->vector_data_size_ >= vector->vector_size_) {
 		CVectorGrow(vector);
@@ -78,8 +61,15 @@ int CVectorSize(CVector vector) {
 	return vector->vector_data_size_;
 }
 
+int CVectorAllSize(CVector vector) {
+	if (vector == NULL) {
+		return 0;
+	}
+	return vector->vector_size_;
+}
+
 void CVectorSet(CVector vector, int index, void* data) {
-	char* dst_addr = ((char*)vector->vector_root_) + vector->vector_item_size_ * vector->vector_data_size_;
+	char* dst_addr = ((char*)vector->vector_root_) + vector->vector_item_size_ * index;
 	memcpy(dst_addr, data, vector->vector_item_size_);
 }
 

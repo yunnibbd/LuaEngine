@@ -1,3 +1,4 @@
+#include "lua_stack.h"
 #include "lua_value.h"
 #include "cvector.h"
 #include <stdio.h>
@@ -13,11 +14,6 @@ do {\
 	}\
 } while (0)
 
-typedef struct {
-	CVector slots; //LuaValue
-	int32_t top;
-} *LuaStack, StructLuaStack;
-
 static void LuaValueFreeFunc(LuaValue* val) {
 	switch (val->type){
 		case LUA_TSTRING:
@@ -27,14 +23,12 @@ static void LuaValueFreeFunc(LuaValue* val) {
 }
 
 static void LuaValueCopyFunc(void* addr, LuaValue* val) {
-	LuaValue* dst = (LuaValue*)addr;
-	dst->type = val->type;
-	dst->data = val->data;
+	memcpy(addr, val, sizeof(LuaValue));
 }
 
 LuaStack LuaStackAlloc(int size) {
 	LuaStack lua_stack = malloc(sizeof(StructLuaStack));
-	lua_stack->slots = CVectorAlloc(size, sizeof(void*), LuaValueFreeFunc, NULL, LuaValueCopyFunc);
+	lua_stack->slots = CVectorAlloc(size, sizeof(LuaValue), LuaValueFreeFunc, NULL, LuaValueCopyFunc);
 	lua_stack->top = 0;
 	return lua_stack;
 }
@@ -46,14 +40,17 @@ void LuaStackFree(LuaStack lua_stack) {
 
 void LuaStackReverse(LuaStack lua_stack, int from, int to) {
 	while (from < to) {
-		CVectorChange(lua_stack->slots, from, to);
+		LuaValue* tp1 = CVectorGet(lua_stack->slots , from);
+		LuaValue* tp2 = CVectorGet(lua_stack->slots, to);
+		CVectorSet(lua_stack->slots, from, tp2);
+		CVectorSet(lua_stack->slots, to, tp1);
 		++from;
 		--to;
 	}
 }
 
 void LuaStackCheck(LuaStack lua_stack, int n) {
-	int free = CVectorSize(lua_stack->slots) - lua_stack->top;
+	int free = CVectorAllSize(lua_stack->slots) - lua_stack->top;
 	while (free < n) {
 		CVectorGrow(lua_stack->slots);
 		free = CVectorSize(lua_stack->slots) - lua_stack->top;
@@ -61,7 +58,7 @@ void LuaStackCheck(LuaStack lua_stack, int n) {
 }
 
 void LuaStackPush(LuaStack lua_stack, LuaValue* lua_value) {
-	if (CVectorSize(lua_stack->slots) == lua_stack->top) {
+	if (CVectorAllSize(lua_stack->slots) == lua_stack->top) {
 		printf("stack overflow!");
 		exit(-1);
 	}
@@ -77,7 +74,10 @@ LuaValue LuaStackPop(LuaStack lua_stack) {
 	--lua_stack->top;
 	LuaValue ret;
 	LuaValue* p_val = CVectorGet(lua_stack->slots, lua_stack->top);
+	LuaValue val;
+	val.type = LUA_TNIL;
 	ret = *p_val;
+	CVectorSet(lua_stack->slots, lua_stack->top, &val);
 	return ret;
 }
 
@@ -95,7 +95,7 @@ bool LuaStackIsValid(LuaStack lua_stack, int idx) {
 	 ABSINDEX(idx);
 	 LuaValue ret;
 	 if (idx > 0 && idx <= lua_stack->top) {
-		 LuaValue * val = CVectorGet(lua_stack->slots, idx);
+		 LuaValue * val = CVectorGet(lua_stack->slots, idx - 1);
 		 ret = *val;
 	 }
 	 else {

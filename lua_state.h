@@ -2,12 +2,15 @@
 #define __LUA_STATE_H__
 #include "lua_stack.h"
 #include "cbuffer.h"
+#include "cvector.h"
 #include <stdbool.h>
 #include <inttypes.h>
 
 typedef int LuaType;
-typedef void* LuaState;
-typedef struct{
+typedef struct {
+	LuaStack stack;
+}*LuaState, StructLuaState;
+typedef struct {
 	int64_t i;
 	bool b;
 }Int64AndBool;
@@ -59,5 +62,7 @@ void LuaStatePushBoolean(LuaState lua_state, bool b);
 void LuaStatePushInteger(LuaState lua_state, int64_t n);
 void LuaStatePushNumber(LuaState lua_state, double n);
 void LuaStatePushString(LuaState lua_state, CBuffer s);
+
+void LuaStatePrint(LuaState lua_state);
 
 #endif

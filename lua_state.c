@@ -1,3 +1,4 @@
+#include "lua_state.h"
 #include "lua_stack.h"
 #include "cbuffer.h"
 #include "cvector.h"
@@ -6,27 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-typedef int LuaType;
-typedef struct {
-	CVector slots; //LuaValue
-	int32_t top;
-} *LuaStack, StructLuaStack;
-typedef struct {
-	LuaStack stack;
-}*LuaState, StructLuaState;
-typedef struct {
-	int64_t i;
-	bool b;
-}Int64AndBool;
-typedef struct {
-	double d;
-	bool b;
-}DoubleAndBool;
-typedef struct {
-	CBuffer s;
-	bool b;
-}StringAndBool;
 
 LuaState LuaStateAlloc() {
 	LuaState lua_state = malloc(sizeof(StructLuaState));
@@ -89,7 +69,7 @@ void LuaStateRotate(LuaState lua_state, int idx, int n) {
 		m = t - n;
 	}
 	else {
-		p - n - 1;
+		m = p - n - 1;
 	}
 	LuaStackReverse(lua_state->stack, p, m);
 	LuaStackReverse(lua_state->stack, m + 1, t);
@@ -111,7 +91,7 @@ void LuaStateSetTop(LuaState lua_state, int idx) {
 	else if(n < 0){
 		LuaValue val;
 		val.type = LUA_TNIL;
-		for (int i = 0; i > n; ++i) {
+		for (int i = 0; i > n; --i) {
 			LuaStackPush(lua_state->stack, &val);
 		}
 	}
@@ -180,31 +160,81 @@ bool LuaStateIsString(LuaState lua_state, int idx) {
 
 bool LuaStateToBoolean(LuaState lua_state, int idx) {
 	LuaValue val = LuaStackGet(lua_state->stack, idx);
-	
+	return LuaValueConvertToBoolean(val);
 }
 
 uint64_t LuaStateToInteger(LuaState lua_state, int idx) {
-
+	Int64AndBool ret = LuaStateToIntegerX(lua_state, idx);
+	return ret.i;
 }
 
 Int64AndBool LuaStateToIntegerX(LuaState lua_state, int idx) {
-
+	LuaValue val = LuaStackGet(lua_state->stack, idx);
+	Int64AndBool ret = {
+		val.data.lua_integer,
+		val.type == LUA_TINTEGER
+	};
+	return ret;
 }
 
 double LuaStateToNumber(LuaState lua_state, int idx) {
-
+	DoubleAndBool ret = LuaStateToNumberX(lua_state, idx);
+	return ret.b;
 }
 
 DoubleAndBool LuaStateToNumberX(LuaState lua_state, int idx) {
-
+	LuaValue val = LuaStackGet(lua_state->stack, idx);
+	DoubleAndBool ret;
+	switch (TYPEOF(val)) {
+		case LUA_TINTEGER:
+			ret.b = true;
+			ret.d = (double)val.data.lua_integer;
+			break;
+		case LUA_TNUMBER:
+			ret.b = true;
+			ret.d = val.data.lua_number;
+			break;
+		default:
+			ret.b = false;
+			ret.d = 0;
+			break;
+	}
+	return ret;
 }
 
 CBuffer LuaStateToString(LuaState lua_state, int idx) {
-
+	StringAndBool ret = LuaStateToStringX(lua_state, idx);
+	return ret.s;
 }
 
 StringAndBool LuaStateToStringX(LuaState lua_state, int idx) {
-
+	LuaValue val = LuaStackGet(lua_state->stack, idx);
+	StringAndBool ret;
+	switch (TYPEOF(val)) {
+		case LUA_TSTRING:
+			ret.b = true;
+			ret.s = val.data.lua_string;
+			break;
+		case LUA_TNUMBER: {
+			char str[8] = { 0 };
+			sprintf(str, "%lf", val.data.lua_number);
+			CBuffer buffer = CBufferFromStr(str, sizeof(str));
+			val.type = LUA_TSTRING;
+			val.data.lua_string = buffer;
+			LuaStackSet(lua_state->stack, idx, val);
+			break;
+		}
+		case LUA_TINTEGER: {
+			char str[8] = { 0 };
+			sprintf(str, "%d", val.data.lua_integer);
+			CBuffer buffer = CBufferFromStr(str, sizeof(str));
+			val.type = LUA_TSTRING;
+			val.data.lua_string = buffer;
+			LuaStackSet(lua_state->stack, idx, val);
+			break;
+		}
+	}
+	return ret;
 }
 
 /* push functions(Go->stack) */
@@ -240,4 +270,37 @@ void LuaStatePushString(LuaState lua_state, CBuffer s) {
 	val.data.lua_string = s;
 	val.type = LUA_TSTRING;
 	LuaStackPush(lua_state->stack, &val);
+}
+
+void LuaStatePrint(LuaState lua_state) {
+	int index = -1;
+	for (;;) {
+		if (LuaStackIsValid(lua_state->stack, index)) {
+			LuaValue val = LuaStackGet(lua_state->stack, index);
+			switch (TYPEOF(val)) {
+				case LUA_TNIL:
+					printf("nil\n");
+					break;
+				case LUA_TBOOLEAN:
+					printf("%s\n", val.data.lua_boolean == 0 ? "false" : "true");
+					break;
+				case LUA_TNUMBER:
+					printf("%lf\n", val.data.lua_number);
+					break;
+				case LUA_TINTEGER:
+					printf("%d\n", val.data.lua_integer);
+					break;
+				case LUA_TSTRING: {
+					char buffer[1024] = { 0 };
+					memcpy(buffer, CBufferData(val.data.lua_string), CBufferDataSize(val.data.lua_string));
+					printf("%s\n", buffer);
+					break;
+				}
+			}
+		}
+		else {
+			break;
+		}
+		--index;
+	}
 }

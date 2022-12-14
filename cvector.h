@@ -2,19 +2,25 @@
 #define __C_VERTOR_H__
 #include <stdbool.h>
 
-typedef void* CVector;
-
 typedef void(*FreeFuncType)(void* element);
 
 typedef bool(*CompareFuncType)(void* element, void* element2);
 
 typedef void(*CopyFuncType)(void* dst_addr, void* element);
 
+typedef struct {
+	void* vector_root_;
+	int vector_size_;
+	int vector_data_size_;
+	int vector_item_size_;
+	FreeFuncType free_func_;
+	CompareFuncType compare_func_;
+	CopyFuncType copy_func_;
+} *CVector, StructCVector;
+
 CVector CVectorAlloc(int vector_size, int vector_item_size, FreeFuncType free_func, CompareFuncType compare_func, CopyFuncType copy_func);
 
 void CVectorGrow(CVector vector);
-
-void CVectorChange(CVector vector, int idx1, int idx2);
 
 void CVectorFree(CVector vector);
 
@@ -27,5 +33,7 @@ void* CVectorGet(CVector vector, int index);
 void* CVectorGetLast(CVector vector);
 
 int CVectorSize(CVector vector);
+
+int CVectorAllSize(CVector vector);
 
 #endif
