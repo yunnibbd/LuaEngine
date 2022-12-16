@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include "binary_chunk.h"
 #include "instruction.h"
+#include "lua_state.h"
 #include "cbuffer.h"
 #include "cvector.h"
-#include "lua_state.h"
 #include "utils.h"
 #include <string.h>
 #include <stdlib.h>
 
 OpCode g_opcodes[47] = {
-/*   T  A    B       C     mode    name */
+	/*     T  A     B       C    mode    name */
 	{0, 1, OpArgR, OpArgN, IABC,  "MOVE    "},
 	{0, 1, OpArgK, OpArgN, IABx,  "LOADK   "},
 	{0, 1, OpArgN, OpArgN, IABx,  "LOADKX  "},
@@ -59,6 +59,7 @@ OpCode g_opcodes[47] = {
 	{0, 0, OpArgU, OpArgU, IAx,   "EXTRAARG"},
 };
 
+
 void PrintHeader(Prototype* proto) {
 	const char* func_type = "main";
 	if (proto->LineDefined > 0) {
@@ -78,48 +79,48 @@ void PrintHeader(Prototype* proto) {
 
 void PrintOperands(Instruction instruction) {
 	switch (OpMode(instruction)) {
-		case IABC: {
-			TABC tabc = ABC(instruction);
-			printf("%d", tabc.a);
-			if (CMode(instruction) != OpArgN) {
-				if (tabc.c > 0xff) {
-					printf(" %d", -1 - (tabc.c & 0xff));
-				}
-				else {
-					printf(" %d", tabc.c);
-				}
-			}
-			if (BMode(instruction) != OpArgN) {
-				if (tabc.b > 0xff) {
-					printf(" %d", -1 - (tabc.b & 0xff));
-				}
-				else {
-					printf(" %d", tabc.b);
-				}
-			}
-			break;
-		}
-		case IABx: {
-			TABx tabx = ABx(instruction);
-			printf("%d", tabx.a);
-			if (BMode(instruction) == OpArgK) {
-				printf(" %d", -1 - tabx.bx);
+	case IABC: {
+		TABC tabc = ABC(instruction);
+		printf("%d", tabc.a);
+		if (CMode(instruction) != OpArgN) {
+			if (tabc.c > 0xff) {
+				printf(" %d", -1 - (tabc.c & 0xff));
 			}
 			else {
-				printf(" %d", tabx.bx);
+				printf(" %d", tabc.c);
 			}
-			break;
 		}
-		case IAsBx: {
-			TAsBx tasbx = AsBx(instruction);
-			printf("%d %d", tasbx.a, tasbx.sbx);
-			break;
+		if (BMode(instruction) != OpArgN) {
+			if (tabc.b > 0xff) {
+				printf(" %d", -1 - (tabc.b & 0xff));
+			}
+			else {
+				printf(" %d", tabc.b);
+			}
 		}
-		case IAx: {
-			int ax = Ax(instruction);
-			printf("%d", ax);
-			break;
+		break;
+	}
+	case IABx: {
+		TABx tabx = ABx(instruction);
+		printf("%d", tabx.a);
+		if (BMode(instruction) == OpArgK) {
+			printf(" %d", -1 - tabx.bx);
 		}
+		else {
+			printf(" %d", tabx.bx);
+		}
+		break;
+	}
+	case IAsBx: {
+		TAsBx tasbx = AsBx(instruction);
+		printf("%d %d", tasbx.a, tasbx.sbx);
+		break;
+	}
+	case IAx: {
+		int ax = Ax(instruction);
+		printf("%d", ax);
+		break;
+	}
 	}
 }
 
@@ -143,25 +144,25 @@ void PrintCode(Prototype* proto) {
 }
 
 void PrintConstant(ConstantType* constant, int i) {
-	switch (constant->tag){
-		case CONSTANT_TAG_NIL:
-			printf("\t%d\t%s\n", i + 1, "nil");
-			break;
-		case CONSTANT_TAG_BOOLEAN:
-			printf("\t%d\t%s\n", i + 1, constant->data.tag_boolean == 0 ? "false" : "true");
-			break;
-		case CONSTANT_TAG_NUMBER:
-			printf("\t%d\t%lf\n", i + 1, constant->data.tag_number);
-			break;
-		case CONSTANT_TAG_INTEGER:
-			printf("\t%d\t%d\n", i + 1, constant->data.tag_integer);
-			break;
-		case CONSTANT_TAG_STR: {
-			char buffer[1024] = { 0 };
-			memcpy(buffer, CBufferData(constant->data.tag_str), CBufferDataSize(constant->data.tag_str));
-			printf("\t%d\t%s\n", i + 1, buffer);
-			break;
-		}
+	switch (constant->tag) {
+	case CONSTANT_TAG_NIL:
+		printf("\t%d\t%s\n", i + 1, "nil");
+		break;
+	case CONSTANT_TAG_BOOLEAN:
+		printf("\t%d\t%s\n", i + 1, constant->data.tag_boolean == 0 ? "false" : "true");
+		break;
+	case CONSTANT_TAG_NUMBER:
+		printf("\t%d\t%lf\n", i + 1, constant->data.tag_number);
+		break;
+	case CONSTANT_TAG_INTEGER:
+		printf("\t%d\t%d\n", i + 1, constant->data.tag_integer);
+		break;
+	case CONSTANT_TAG_STR: {
+		char buffer[1024] = { 0 };
+		memcpy(buffer, CBufferData(constant->data.tag_str), CBufferDataSize(constant->data.tag_str));
+		printf("\t%d\t%s\n", i + 1, buffer);
+		break;
+	}
 	}
 }
 
@@ -206,27 +207,29 @@ void PrintDetail(Prototype* proto) {
 void PrintStack(LuaState lua_state) {
 	int top = LuaStateGetTop(lua_state);
 	for (int i = 1; i <= top; ++i) {
-		LuaType t = LuaStateType(lua_state, i);
-		switch (t){
-			case LUA_TBOOLEAN:
-				printf("[%s]", LuaStateToBoolean(lua_state, i) == 0 ? "false" : "true");
-				break;
-			case LUA_TINTEGER:
-				printf("[%d]", LuaStateToInteger(lua_state, i));
-				break;
-			case LUA_TNUMBER:
-				printf("[%lf]", LuaStateToNumber(lua_state, i));
-				break;
-			case LUA_TSTRING: {
-				CBuffer str = LuaStateToString(lua_state, i);
-				char buffer[1024] = { 0 };
-				memcpy(buffer, CBufferData(str), CBufferDataSize(str));
-				printf("[%s]", buffer);
-				break;
-			}
-			default:
-				printf("[%s]", LuaStateTypeName(lua_state, t));
+		LuaType type = LuaStateType(lua_state, i);
+		switch (type) {
+		case LUA_TBOOLEAN:
+			printf("[%s]", LuaStateToBoolean(lua_state, i) == 0 ? "false" : "true");
+			break;
+		case LUA_TNUMBER:
+			printf("[%lf]", LuaStateToNumber(lua_state, i));
+			break;
+		case LUA_TINTEGER:
+			printf("[%d]", LuaStateToInteger(lua_state, i));
+			break;
+		case LUA_TSTRING: {
+			CBuffer str = LuaStateToString(lua_state, i);
+			char buffer[1024] = { 0 };
+			memcpy(buffer, CBufferData(str), CBufferDataSize(str));
+			printf("[%s]", buffer);
+			break;
 		}
+		default:
+			printf("[%s]", LuaStateTypeName(lua_state, type));
+			break;
+		}
+
 	}
 	printf("\n");
 }
@@ -244,27 +247,37 @@ int main(int argc, const char* const* argv) {
 		PrintDetail(proto);
 		printf("\nhello yunni\n");
 	}*/
+
 	const char* greet = "hello yunni";
-	//printf("%s\n", greet);
+
 	LuaState lua_state = LuaStateAlloc();
-	LuaStatePushBoolean(lua_state, true); PrintStack(lua_state);
-	LuaStatePushInteger(lua_state, 10); PrintStack(lua_state);
-	LuaStatePushNil(lua_state); PrintStack(lua_state);
+	LuaStatePushBoolean(lua_state, true);								 PrintStack(lua_state);
+	/*LuaStatePrint(lua_state);
+	printf("======================================\n");*/
+	LuaStatePushInteger(lua_state, 10);									 PrintStack(lua_state);
+	/*LuaStatePrint(lua_state);
+	printf("======================================\n");*/
+	LuaStatePushNil(lua_state);											 PrintStack(lua_state);
+	/*LuaStatePrint(lua_state);
+	printf("======================================\n");*/
 	LuaStatePushString(lua_state, CBufferFromStr(greet, strlen(greet))); PrintStack(lua_state);
-	LuaStatePushValue(lua_state, -4); PrintStack(lua_state);
-	//printf("========================================\n");
-	//LuaStatePrint(lua_state);
-	LuaStateReplace(lua_state, 3); PrintStack(lua_state);
-	//printf("========================================\n");
-	//LuaStatePrint(lua_state);
-	LuaStateSetTop(lua_state, 6); PrintStack(lua_state);
-	//printf("========================================\n");
-	//LuaStatePrint(lua_state);
-	LuaStateRemove(lua_state, -3); PrintStack(lua_state);
-	//printf("========================================\n");
-	//LuaStatePrint(lua_state);
-	LuaStateSetTop(lua_state, -5); PrintStack(lua_state);
-	//printf("========================================\n");
-	//LuaStatePrint(lua_state);
+	/*LuaStatePrint(lua_state);
+	printf("======================================\n");*/
+	LuaStatePushValue(lua_state, -4);									 PrintStack(lua_state);
+	/*LuaStatePrint(lua_state);
+	printf("======================================\n");*/
+	LuaStateReplace(lua_state, 3);										 PrintStack(lua_state);
+	/*LuaStatePrint(lua_state);
+	printf("======================================\n");*/
+	LuaStateSetTop(lua_state, 6);										 PrintStack(lua_state);
+	/*LuaStatePrint(lua_state);
+	printf("======================================\n");*/
+	LuaStateRemove(lua_state, -3);										 PrintStack(lua_state);
+	/*LuaStatePrint(lua_state);
+	printf("======================================\n");*/
+	LuaStateSetTop(lua_state, -5);										 PrintStack(lua_state);
+	/*LuaStatePrint(lua_state);
+	printf("======================================\n");*/
+	LuaStateFree(lua_state);
 	return 0;
 }

@@ -30,12 +30,12 @@ typedef struct {
 
 #define TYPEOF(val) val.type
 
-inline bool LuaValueConvertToBoolean(LuaValue val) {
-	switch (TYPEOF(val)){
+inline bool LuaValueConvertToBoolean(LuaValue* val) {
+	switch (val->type){
 		case LUA_TNIL:
 			return false;
 		case LUA_TBOOLEAN:
-			return val.data.lua_boolean;
+			return val->data.lua_boolean;
 		default:
 			return true;
 	}

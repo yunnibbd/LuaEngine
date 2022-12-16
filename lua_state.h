@@ -2,8 +2,6 @@
 #define __LUA_STATE_H__
 #include "lua_stack.h"
 #include "cbuffer.h"
-#include "cvector.h"
-#include <stdbool.h>
 #include <inttypes.h>
 
 typedef int LuaType;
@@ -40,7 +38,7 @@ void LuaStateRemove(LuaState lua_state, int idx);
 void LuaStateRotate(LuaState lua_state, int idx, int n);
 void LuaStateSetTop(LuaState lua_state, int idx);
 /* access functions(stack->Go) */
-CBuffer LuaStateTypeName(LuaState lua_state, LuaType tp);
+const char* LuaStateTypeName(LuaState lua_state, LuaType tp);
 LuaType LuaStateType(LuaState lua_state, int idx);
 bool LuaStateIsNone(LuaState lua_state, int idx);
 bool LuaStateIsNil(LuaState lua_state, int idx);
@@ -62,7 +60,5 @@ void LuaStatePushBoolean(LuaState lua_state, bool b);
 void LuaStatePushInteger(LuaState lua_state, int64_t n);
 void LuaStatePushNumber(LuaState lua_state, double n);
 void LuaStatePushString(LuaState lua_state, CBuffer s);
-
 void LuaStatePrint(LuaState lua_state);
-
 #endif
