@@ -2,24 +2,13 @@
 #define __LUA_STATE_H__
 #include "lua_stack.h"
 #include "cbuffer.h"
+#include "common_type.h"
 #include <inttypes.h>
 
 typedef int LuaType;
 typedef struct {
 	LuaStack stack;
 }*LuaState, StructLuaState;
-typedef struct {
-	int64_t i;
-	bool b;
-}Int64AndBool;
-typedef struct {
-	double d;
-	bool b;
-}DoubleAndBool;
-typedef struct {
-	CBuffer s;
-	bool b;
-}StringAndBool;
 
 LuaState LuaStateAlloc();
 

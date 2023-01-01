@@ -1,5 +1,6 @@
 #include "lua_state.h"
 #include "lua_value.h"
+#include "parser.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -172,22 +173,7 @@ double LuaStateToNumber(LuaState lua_state, int idx) {
 
 DoubleAndBool LuaStateToNumberX(LuaState lua_state, int idx) {
 	LuaValue val = LuaStackGet(lua_state->stack, idx);
-	DoubleAndBool ret;
-	switch (val.type) {
-	case LUA_TNUMBER:
-		ret.b = true;
-		ret.d = val.data.lua_number;
-		break;
-	case LUA_TINTEGER:
-		ret.b = true;
-		ret.d = val.data.lua_integer;
-		break;
-	default:
-		ret.b = false;
-		ret.d = 0;
-		break;
-	}
-	return ret;
+	return LuaValueConvertToFloat(&val);
 }
 
 CBuffer LuaStateToString(LuaState lua_state, int idx) {
