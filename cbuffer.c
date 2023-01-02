@@ -98,3 +98,11 @@ void CBufferPop(CBuffer buffer, int size) {
 void CBufferClear(CBuffer buffer) {
 	buffer->data_size_ = 0;
 }
+
+bool CBufferCompare(CBuffer buffer, CBuffer buffer2) {
+	if (buffer->data_size_ != buffer2->data_size_) {
+		return false;
+	}
+
+	return strncmp(buffer->data_, buffer2->data_, buffer->data_size_) == 0;
+}

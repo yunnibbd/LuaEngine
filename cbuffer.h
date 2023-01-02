@@ -30,4 +30,6 @@ void CBufferPop(CBuffer buffer, int size);
 
 void CBufferClear(CBuffer buffer);
 
+bool CBufferCompare(CBuffer buffer, CBuffer buffer2);
+
 #endif

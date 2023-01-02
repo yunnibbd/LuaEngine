@@ -279,6 +279,43 @@ void LuaStatePrint(LuaState lua_state) {
 	}
 }
 
+static LuaValue _arith(LuaValue* a, LuaValue* b, Operator op) {
+	LuaValue ret;
+	if (op.floatFunc == NULL) {
+		Int64AndBool iab = LuaValueConvertToInteger(a);
+		if (iab.b) {
+			Int64AndBool iab2 = LuaValueConvertToInteger(b);
+			if (iab2.b) {
+				ret.data.lua_integer = op.integerFunc(iab.i, iab2.i);
+				ret.type = LUA_TINTEGER;
+				return ret;
+			}
+		}
+	}
+	else {
+		if (op.integerFunc != NULL) {
+			if (a->type == LUA_TINTEGER) {
+				if (b->type == LUA_TINTEGER) {
+					ret.data.lua_integer = op.integerFunc(a->data.lua_integer, b->data.lua_integer);
+					ret.type = LUA_TINTEGER;
+					return ret;
+				}
+			}
+		}
+		DoubleAndBool dab = LuaValueConvertToFloat(a);
+		if (dab.b) {
+			DoubleAndBool dab2 = LuaValueConvertToFloat(b);
+			if (dab2.b) {
+				ret.data.lua_number = op.floatFunc(dab.d, dab.d);
+				ret.type = LUA_TNUMBER;
+				return ret;
+			}
+		}
+	}
+	ret.type = LUA_TNIL;
+	return ret;
+}
+
 void LuaStateArith(LuaState lua_state, ArithOp op) {
 	LuaValue b = LuaStackPop(lua_state->stack);
 	LuaValue a, bluaValue;
@@ -290,10 +327,75 @@ void LuaStateArith(LuaState lua_state, ArithOp op) {
 	}
 
 	Operator operator = g_operators[op];
+	LuaValue result = _arith(&a, &b, operator);
+	if (result.type != LUA_TNIL) {
+		LuaStackPush(lua_state->stack, &result);
+	}
+	else {
+		printf("arithmetic error!\n");
+		exit(-1);
+	}
+}
+
+static bool _eq(LuaValue* a, LuaValue* b) {
+	switch (a->type) {
+		case LUA_TNIL:
+			return b->type == LUA_TNIL;
+		case LUA_TBOOLEAN:
+			return a->data.lua_boolean == b->data.lua_boolean;
+		case LUA_TSTRING:
+			return CBufferCompare(a->data.lua_string, b->data.lua_string);
+		case LUA_TINTEGER: {
+			switch (b->type) {
+				case LUA_TINTEGER:
+					return a->data.lua_integer == b->data.lua_integer;
+				case LUA_TNUMBER:
+					return (double)a->data.lua_integer == b->data.lua_number;
+				default:
+					return false;
+			}
+
+		}
+		case LUA_TNUMBER: {
+			switch (b->type) {
+			case LUA_TINTEGER:
+				return a->data.lua_number == (double)b->data.lua_integer;
+			case LUA_TNUMBER:
+				return a->data.lua_number == b->data.lua_number;
+			default:
+				return false;
+			}
+		}
+		default:
+			return a == b;
+	}
+}
+
+static bool _lt(LuaValue* a, LuaValue* b) {
+	switch (a->type) {
+		case LUA_TSTRING: {
+			if (b->type == LUA_TSTRING) {
+
+			}
+		}
+	}
 
 }
 
 bool LuaStateCompare(LuaState lua_state, int idx1, int idx2, CompareOp op) {
+	LuaValue a = LuaStackGet(lua_state->stack, idx1);
+	LuaValue b = LuaStackGet(lua_state->stack, idx2);
+	switch (op) {
+		case LUA_OPEQ:
+			break;
+		case LUA_OPLT:
+			break;
+		case LUA_OPLE:
+			break;
+		default:
+			printf("invaild compare op!\n");
+			exit(-1);
+	}
 
 }
 
