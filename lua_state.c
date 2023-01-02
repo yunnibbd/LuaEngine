@@ -197,7 +197,7 @@ StringAndBool LuaStateToStringX(LuaState lua_state, int idx) {
 	}
 	case LUA_TINTEGER: {
 		char str[8] = { 0 };
-		sprintf(str, "%d", val.data.lua_integer);
+		sprintf(str, "%lld", val.data.lua_integer);
 		CBuffer buffer = CBufferFromStr(str, sizeof(str));
 		break;
 	}
@@ -257,7 +257,7 @@ void LuaStatePrint(LuaState lua_state) {
 				printf("%s\n", val.data.lua_boolean == 0 ? "false" : "true");
 				break;
 			case LUA_TINTEGER:
-				printf("%d\n", val.data.lua_integer);
+				printf("%lld\n", val.data.lua_integer);
 				break;
 			case LUA_TNUMBER:
 				printf("%lf\n", val.data.lua_number);
@@ -277,4 +277,30 @@ void LuaStatePrint(LuaState lua_state) {
 		}
 		--idx;
 	}
+}
+
+void LuaStateArith(LuaState lua_state, ArithOp op) {
+	LuaValue b = LuaStackPop(lua_state->stack);
+	LuaValue a, bluaValue;
+	if (op != LUA_OPUNM && op != LUA_OPBNOT) {
+		a = LuaStackPop(lua_state->stack);
+	}
+	else {
+		a = b;
+	}
+
+	Operator operator = g_operators[op];
+
+}
+
+bool LuaStateCompare(LuaState lua_state, int idx1, int idx2, CompareOp op) {
+
+}
+
+void LuaStateLen(LuaState lua_state, int idx) {
+
+}
+
+void LuaStateConcat(LuaState lua_state, int n) {
+
 }

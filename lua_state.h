@@ -6,9 +6,19 @@
 #include <inttypes.h>
 
 typedef int LuaType;
+typedef int ArithOp;
+typedef int CompareOp;
+
 typedef struct {
 	LuaStack stack;
 }*LuaState, StructLuaState;
+
+typedef struct {
+	int64_t(*integerFunc)(int64_t, int64_t);
+	double(*floatFunc)(double, double);
+} Operator;
+
+extern Operator g_operators[14];
 
 LuaState LuaStateAlloc();
 
@@ -50,4 +60,9 @@ void LuaStatePushInteger(LuaState lua_state, int64_t n);
 void LuaStatePushNumber(LuaState lua_state, double n);
 void LuaStatePushString(LuaState lua_state, CBuffer s);
 void LuaStatePrint(LuaState lua_state);
+void LuaStateArith(LuaState lua_state, ArithOp op);
+bool LuaStateCompare(LuaState lua_state, int idx1, int idx2, CompareOp op);
+void LuaStateLen(LuaState lua_state, int idx);
+void LuaStateConcat(LuaState lua_state, int n);
+
 #endif

@@ -3,6 +3,7 @@
 #include "instruction.h"
 #include "lua_state.h"
 #include "cbuffer.h"
+#include "lua_math.h"
 #include "cvector.h"
 #include "utils.h"
 #include <string.h>
@@ -59,6 +60,22 @@ OpCode g_opcodes[47] = {
 	{0, 0, OpArgU, OpArgU, IAx,   "EXTRAARG"},
 };
 
+Operator g_operators[14] = {
+	{lua_iadd, lua_fadd},
+	{lua_isub, lua_fsub},
+	{lua_imul, lua_fmul},
+	{lua_imod, lua_fmod},
+	{NULL, lua_pow},
+	{NULL, lua_div},
+	{lua_iidiv, lua_fidiv},
+	{lua_band, NULL},
+	{lua_bor, NULL},
+	{lua_bxor, NULL},
+	{lua_shl, NULL},
+	{lua_shr, NULL},
+	{lua_iunm, lua_funm},
+	{lua_bnot, NULL}
+};
 
 void PrintHeader(Prototype* proto) {
 	const char* func_type = "main";
@@ -136,7 +153,7 @@ void PrintCode(Prototype* proto) {
 			printf("\t%d\t[%d]\t%s \t", i + 1, **line, OpName(instruction));
 		}
 		else {
-			printf("\t%d\t[-]\t%s \t", i + 1, **line, OpName(instruction));
+			printf("\t%d\t[-]\t%s \t", i + 1, OpName(instruction));
 		}
 		PrintOperands(instruction);
 		printf("\n");
@@ -155,7 +172,7 @@ void PrintConstant(ConstantType* constant, int i) {
 		printf("\t%d\t%lf\n", i + 1, constant->data.tag_number);
 		break;
 	case CONSTANT_TAG_INTEGER:
-		printf("\t%d\t%d\n", i + 1, constant->data.tag_integer);
+		printf("\t%d\t%lld\n", i + 1, constant->data.tag_integer);
 		break;
 	case CONSTANT_TAG_STR: {
 		char buffer[1024] = { 0 };
@@ -216,7 +233,7 @@ void PrintStack(LuaState lua_state) {
 			printf("[%lf]", LuaStateToNumber(lua_state, i));
 			break;
 		case LUA_TINTEGER:
-			printf("[%d]", LuaStateToInteger(lua_state, i));
+			printf("[%llu]", LuaStateToInteger(lua_state, i));
 			break;
 		case LUA_TSTRING: {
 			CBuffer str = LuaStateToString(lua_state, i);

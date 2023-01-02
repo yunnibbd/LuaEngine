@@ -52,7 +52,7 @@ inline DoubleAndBool LuaValueConvertToFloat(LuaValue* val) {
 		break;
 	case LUA_TINTEGER:
 		ret.b = true;
-		ret.d = val->data.lua_integer;
+		ret.d = (double)val->data.lua_integer;
 		break;
 	case LUA_TSTRING:
 		ret.b = true;
@@ -77,8 +77,12 @@ inline Int64AndBool LuaValueConvertToInteger(LuaValue* val) {
 		}
 		case LUA_TNUMBER:
 			return FloatToInteger(val->data.lua_number);
-		case LUA_TSTRING:
-			return ParseInteger(val->data.lua_string);
+		case LUA_TSTRING: {
+			Int64AndBool ret;
+			ret.i = _atoi64(CBufferData(val->data.lua_string));
+			ret.b = true;
+			return ret;
+		}
 		default: {
 			Int64AndBool ret;
 			ret.b = false;
