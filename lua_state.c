@@ -190,15 +190,19 @@ StringAndBool LuaStateToStringX(LuaState lua_state, int idx) {
 		ret.s = val.data.lua_string;
 		break;
 	case LUA_TNUMBER: {
-		char str[8] = { 0 };
+		char* str = malloc(8);
+		memset(str, 0, 8);
 		sprintf(str, "%lf", val.data.lua_number);
-		CBuffer buffer = CBufferFromStr(str, sizeof(str));
+		ret.b = true;
+		ret.s = CBufferFromStr(str, strlen(str));
 		break;
 	}
 	case LUA_TINTEGER: {
-		char str[8] = { 0 };
+		char* str = malloc(8);
+		memset(str, 0, 8);
 		sprintf(str, "%lld", val.data.lua_integer);
-		CBuffer buffer = CBufferFromStr(str, sizeof(str));
+		ret.b = true;
+		ret.s = CBufferFromStr(str, strlen(str));
 		break;
 	}
 	default:
@@ -306,7 +310,7 @@ static LuaValue _arith(LuaValue* a, LuaValue* b, Operator op) {
 		if (dab.b) {
 			DoubleAndBool dab2 = LuaValueConvertToFloat(b);
 			if (dab2.b) {
-				ret.data.lua_number = op.floatFunc(dab.d, dab.d);
+				ret.data.lua_number = op.floatFunc(dab.d, dab2.d);
 				ret.type = LUA_TNUMBER;
 				return ret;
 			}
@@ -375,10 +379,65 @@ static bool _lt(LuaValue* a, LuaValue* b) {
 	switch (a->type) {
 		case LUA_TSTRING: {
 			if (b->type == LUA_TSTRING) {
-
+				return CBufferDataSize(a->data.lua_string) < CBufferDataSize(b->data.lua_string);
 			}
+			break;
+		}
+		case LUA_TINTEGER: {
+			switch (b->type) {
+				case LUA_TINTEGER:
+					return a->data.lua_integer < b->data.lua_integer;
+				case LUA_TNUMBER:
+					return (double)a->data.lua_integer < b->data.lua_number;
+			}
+			break;
+		}
+		case LUA_TNUMBER: {
+			switch (b->type) {
+				case LUA_TNUMBER:
+					return a->data.lua_number < b->data.lua_number;
+				case LUA_TINTEGER:
+					return a->data.lua_number < (double)b->data.lua_integer;
+			}
+
+			break;
 		}
 	}
+	printf("comparsion error!");
+	exit(-1);
+
+}
+
+static bool _le(LuaValue* a, LuaValue* b) {
+	switch (a->type) {
+	case LUA_TSTRING: {
+		if (b->type == LUA_TSTRING) {
+			return CBufferDataSize(a->data.lua_string) <= CBufferDataSize(b->data.lua_string);
+		}
+		break;
+	}
+	case LUA_TINTEGER: {
+		switch (b->type) {
+		case LUA_TINTEGER:
+			return a->data.lua_integer <= b->data.lua_integer;
+		case LUA_TNUMBER:
+			return (double)a->data.lua_integer <= b->data.lua_number;
+		}
+		break;
+	}
+	case LUA_TNUMBER: {
+		switch (b->type) {
+		case LUA_TNUMBER:
+			return a->data.lua_number <= b->data.lua_number;
+		case LUA_TINTEGER:
+			return a->data.lua_number <= (double)b->data.lua_integer;
+		}
+
+		break;
+	}
+	}
+	printf("comparsion error!");
+	exit(-1);
 
 }
 
@@ -387,11 +446,11 @@ bool LuaStateCompare(LuaState lua_state, int idx1, int idx2, CompareOp op) {
 	LuaValue b = LuaStackGet(lua_state->stack, idx2);
 	switch (op) {
 		case LUA_OPEQ:
-			break;
+			return _eq(&a, &b);
 		case LUA_OPLT:
-			break;
+			return _lt(&a, &b);
 		case LUA_OPLE:
-			break;
+			return _le(&a, &b);
 		default:
 			printf("invaild compare op!\n");
 			exit(-1);
@@ -400,9 +459,46 @@ bool LuaStateCompare(LuaState lua_state, int idx1, int idx2, CompareOp op) {
 }
 
 void LuaStateLen(LuaState lua_state, int idx) {
-
+	LuaValue val = LuaStackGet(lua_state->stack, idx);
+	if (val.type == LUA_TSTRING) {
+		LuaValue i;
+		i.type = LUA_TINTEGER;
+		i.data.lua_integer = CBufferDataSize(val.data.lua_string);
+		LuaStackPush(lua_state->stack, &i);
+	}
+	else {
+		printf("length error!");
+		exit(-1);
+	}
 }
 
 void LuaStateConcat(LuaState lua_state, int n) {
-
+	if (n == 0) {
+		LuaValue s;
+		s.type = LUA_TSTRING;
+		s.data.lua_string = CBufferFromStr("", 1);
+		LuaStackPush(lua_state->stack, &s);
+	}
+	else {
+		for (int i = 1; i < n; ++i) {
+			if (LuaStateIsString(lua_state, -1) && LuaStateIsString(lua_state, -2)) {
+				CBuffer s2 = LuaStateToString(lua_state, -1);
+				CBuffer s1 = LuaStateToString(lua_state, -2);
+				LuaStackPop(lua_state->stack);
+				LuaStackPop(lua_state->stack);
+				CBuffer s = CBufferAlloc(CBufferDataSize(s1) + CBufferDataSize(s2));
+				CBufferPush(s, CBufferData(s1), CBufferDataSize(s1));
+				CBufferPush(s, CBufferData(s2), CBufferDataSize(s2));
+				LuaValue val;
+				val.type = LUA_TSTRING;
+				val.data.lua_string = s;
+				LuaStackPush(lua_state->stack, &val);
+				/*CBufferFree(s1);
+				CBufferFree(s2);*/
+				continue;
+			}
+			printf("concatenation error!");
+			exit(-1);
+		}
+	}
 }

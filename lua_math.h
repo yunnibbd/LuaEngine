@@ -76,7 +76,7 @@ inline double lua_funm(double a, double _) {
 }
 
 inline int64_t lua_bnot(int64_t a, int64_t _) {
-	return ~a;
+	return -1 ^ a;
 }
 
 enum LuaMathOp {

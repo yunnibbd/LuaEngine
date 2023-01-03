@@ -47,7 +47,7 @@ static CBuffer BinaryChunkReadString() {
 
 	buffer = CBufferAlloc((int)len - 1);
 	CBufferStreamRead(buffer_stream, CBufferData(buffer), (int)len - 1);
-	CBufferSetDataSize(buffer, len - 1);
+	CBufferSetDataSize(buffer, (int)len - 1);
 	return  buffer;
 }
 
