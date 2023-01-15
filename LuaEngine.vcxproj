@@ -137,13 +137,14 @@
     <ClInclude Include="binary_chunk.h" />
     <ClInclude Include="cbuffer.h" />
     <ClInclude Include="cbuffer_stream.h" />
-    <ClInclude Include="common_type.h" />
+    <ClInclude Include="lua_common_type.h" />
     <ClInclude Include="cvector.h" />
     <ClInclude Include="instruction.h" />
     <ClInclude Include="lua_math.h" />
     <ClInclude Include="lua_stack.h" />
     <ClInclude Include="lua_state.h" />
     <ClInclude Include="lua_value.h" />
+    <ClInclude Include="lua_vm.h" />
     <ClInclude Include="opcodes.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="utils.h" />

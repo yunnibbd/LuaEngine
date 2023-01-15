@@ -1,9 +1,7 @@
-
 #ifndef __PARSER_H__
 #define __PARSER_H__
-#include "common_type.h"
+#include "common_types.h"
 #include "cbuffer.h"
-#include "lua_value.h"
 
 inline Int64AndBool ParseInteger(CBuffer str) {
 	Int64AndBool ret;

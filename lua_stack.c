@@ -69,7 +69,7 @@ LuaValue LuaStackPop(LuaStack lua_stack) {
 	}
 	--lua_stack->top;
 	LuaValue* pVal = CVectorGet(lua_stack->slots, lua_stack->top);
-	--lua_stack->slots->vector_data_size_;
+	CVectorDecDataSize(lua_stack->slots, CVectorSize(lua_stack->slots) - 1);
 	LuaValue ret = *pVal;
 	pVal->type = LUA_TNIL;
 	return ret;

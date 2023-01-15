@@ -74,10 +74,13 @@
     <ClInclude Include="lua_math.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="common_type.h">
+    <ClInclude Include="parser.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="parser.h">
+    <ClInclude Include="lua_vm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_common_type.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

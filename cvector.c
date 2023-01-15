@@ -1,4 +1,3 @@
-#include "cvector.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +9,16 @@ typedef void(*FreeFuncType)(void* element);
 typedef bool(*CompareFuncType)(void* element, void* element2);
 
 typedef void(*CopyFuncType)(void* dst_addr, void* element);
+
+typedef struct {
+	void* vector_root_;
+	int vector_size_;
+	int vector_data_size_;
+	int vector_item_size_;
+	FreeFuncType free_func_;
+	CompareFuncType compare_func_;
+	CopyFuncType copy_func_;
+} *CVector, StructCVector;
 
 CVector CVectorAlloc(int vector_size, int vector_item_size, FreeFuncType free_func, CompareFuncType compare_func, CopyFuncType copy_func) {
 	CVector vector = malloc(sizeof(StructCVector));
@@ -62,9 +71,6 @@ int CVectorSize(CVector vector) {
 }
 
 int CVectorAllSize(CVector vector) {
-	if (vector == NULL) {
-		return 0;
-	}
 	return vector->vector_size_;
 }
 
@@ -83,4 +89,17 @@ void* CVectorGet(CVector vector, int index) {
 
 void* CVectorGetLast(CVector vector) {
 	return CVectorGet(vector, vector->vector_data_size_ - 1);
+}
+
+void* CVectorPop(CVector vector) {
+	void* data = (char*)vector->vector_root_ + vector->vector_data_size_ * vector->vector_item_size_;
+	--vector->vector_data_size_;
+	return data;
+}
+
+void CVectorDecDataSize(CVector vector) {
+	vector->vector_data_size_ -= 1;
+	if (vector->vector_data_size_ < 0) {
+		vector->vector_data_size_ = 0;
+	}
 }

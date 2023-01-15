@@ -1,6 +1,5 @@
 #include "lua_state.h"
 #include "lua_value.h"
-#include "parser.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -31,7 +30,7 @@ bool LuaStateCheckStack(LuaState lua_state, int n) {
 }
 
 void LuaStatePop(LuaState lua_state, int n) {
-	LuaStateSetTop(lua_state, -n - 1);
+	LuaStateSetTop(lua_state , -n - 1);
 }
 
 void LuaStateCopy(LuaState lua_state, int fromIdx, int toIdx) {
@@ -53,7 +52,7 @@ void LuaStateInsert(LuaState lua_state, int idx) {
 	LuaStateRotate(lua_state, idx, 1);
 }
 
-void LuaStateRemove(LuaState lua_state, int idx) {
+void LuaStateRemove(LuaState lua_state, int idx){
 	LuaStateRotate(lua_state, idx, -1);
 	LuaStatePop(lua_state, 1);
 }
@@ -96,17 +95,17 @@ void LuaStateSetTop(LuaState lua_state, int idx) {
 
 /* access functions(stack->Go) */
 const char* LuaStateTypeName(LuaState lua_state, LuaType tp) {
-	switch (tp) {
-	case LUA_TNONE:     return "no value";
-	case LUA_TNIL:      return "nil";
-	case LUA_TBOOLEAN:  return "boolean";
-	case LUA_TINTEGER:  return "integer";
-	case LUA_TNUMBER:   return "number";
-	case LUA_TSTRING:   return "string";
-	case LUA_TTABLE:    return "table";
-	case LUA_TFUNCTION: return "function";
-	case LUA_TTHREAD:   return "thread";
-	default:            return "userdata";
+	switch (tp){
+		case LUA_TNONE:     return "no value";
+		case LUA_TNIL:      return "nil";
+		case LUA_TBOOLEAN:  return "boolean";
+		case LUA_TINTEGER:  return "integer";
+		case LUA_TNUMBER:   return "number";
+		case LUA_TSTRING:   return "string";
+		case LUA_TTABLE:    return "table";
+		case LUA_TFUNCTION: return "function";
+		case LUA_TTHREAD:   return "thread";
+		default:            return "userdata";
 	}
 }
 
@@ -159,11 +158,7 @@ uint64_t LuaStateToInteger(LuaState lua_state, int idx) {
 
 Int64AndBool LuaStateToIntegerX(LuaState lua_state, int idx) {
 	LuaValue val = LuaStackGet(lua_state->stack, idx);
-	Int64AndBool ret = {
-		val.data.lua_integer,
-		val.type == LUA_TINTEGER
-	};
-	return ret;
+	return LuaValueConvertToInteger(&val);
 }
 
 double LuaStateToNumber(LuaState lua_state, int idx) {
@@ -184,31 +179,29 @@ CBuffer LuaStateToString(LuaState lua_state, int idx) {
 StringAndBool LuaStateToStringX(LuaState lua_state, int idx) {
 	LuaValue val = LuaStackGet(lua_state->stack, idx);
 	StringAndBool ret;
-	switch (val.type) {
-	case LUA_TSTRING:
-		ret.b = true;
-		ret.s = val.data.lua_string;
-		break;
-	case LUA_TNUMBER: {
-		char* str = malloc(8);
-		memset(str, 0, 8);
-		sprintf(str, "%lf", val.data.lua_number);
-		ret.b = true;
-		ret.s = CBufferFromStr(str, strlen(str));
-		break;
-	}
-	case LUA_TINTEGER: {
-		char* str = malloc(8);
-		memset(str, 0, 8);
-		sprintf(str, "%lld", val.data.lua_integer);
-		ret.b = true;
-		ret.s = CBufferFromStr(str, strlen(str));
-		break;
-	}
-	default:
-		ret.b = false;
-		ret.s = CBufferFromStr("", 1);
-		break;
+	switch (val.type){
+		case LUA_TSTRING:
+			ret.b = true;
+			ret.s = val.data.lua_string;
+			break;
+		case LUA_TNUMBER: {
+			char* str = malloc(8);
+			sprintf(str, "%lf", val.data.lua_number);
+			CBuffer buffer = CBufferFromStr(str, strlen(str));
+			break;
+		}
+		case LUA_TINTEGER: {
+			char* str = malloc(8);
+			sprintf(str, "%lld", val.data.lua_integer);
+			CBuffer buffer = CBufferFromStr(str, strlen(str));
+			ret.b = true;
+			ret.s = buffer;
+			break;
+		}
+		default:
+			ret.b = false;
+			ret.s = CBufferFromStr("", 1);
+			break;
 	}
 	return ret;
 }
@@ -223,7 +216,7 @@ void LuaStatePushNil(LuaState lua_state) {
 void LuaStatePushBoolean(LuaState lua_state, bool b) {
 	LuaValue val;
 	val.type = LUA_TBOOLEAN;
-	val.data.lua_boolean = b;
+	val.data.lua_boolearn = b;
 	LuaStackPush(lua_state->stack, &val);
 }
 
@@ -253,27 +246,27 @@ void LuaStatePrint(LuaState lua_state) {
 	for (;;) {
 		if (LuaStackIsVaild(lua_state->stack, idx)) {
 			LuaValue val = LuaStackGet(lua_state->stack, idx);
-			switch (TYPEOF(val)) {
-			case LUA_TNIL:
-				printf("nil\n");
-				break;
-			case LUA_TBOOLEAN:
-				printf("%s\n", val.data.lua_boolean == 0 ? "false" : "true");
-				break;
-			case LUA_TINTEGER:
-				printf("%lld\n", val.data.lua_integer);
-				break;
-			case LUA_TNUMBER:
-				printf("%lf\n", val.data.lua_number);
-				break;
-			case LUA_TSTRING: {
-				char buffer[1024] = { 0 };
-				memcpy(buffer, CBufferData(val.data.lua_string), CBufferDataSize(val.data.lua_string));
-				printf("%s\n", buffer);
-				break;
-			}
-			default:
-				break;
+			switch (TYPEOF(val)){
+				case LUA_TNIL:
+					printf("nil\n");
+					break;
+				case LUA_TBOOLEAN:
+					printf("%s\n", val.data.lua_boolearn == 0 ? "false" : "true");
+					break;
+				case LUA_TINTEGER:
+					printf("%lld\n", val.data.lua_integer);
+					break;
+				case LUA_TNUMBER:
+					printf("%lf\n", val.data.lua_number);
+					break;
+				case LUA_TSTRING: {
+					char buffer[1024] = { 0 };
+					memcpy(buffer, CBufferData(val.data.lua_string), CBufferDataSize(val.data.lua_string));
+					printf("%s\n", buffer);
+					break;
+				}
+				default:
+					break;
 			}
 		}
 		else {
@@ -297,15 +290,16 @@ static LuaValue _arith(LuaValue* a, LuaValue* b, Operator op) {
 		}
 	}
 	else {
-		if (op.integerFunc != NULL) {
+		if (op.floatFunc != NULL) {
 			if (a->type == LUA_TINTEGER) {
 				if (b->type == LUA_TINTEGER) {
-					ret.data.lua_integer = op.integerFunc(a->data.lua_integer, b->data.lua_integer);
+					ret.data.lua_integer = op.integerFunc(a->data.lua_integer, a->data.lua_integer);
 					ret.type = LUA_TINTEGER;
 					return ret;
 				}
 			}
 		}
+
 		DoubleAndBool dab = LuaValueConvertToFloat(a);
 		if (dab.b) {
 			DoubleAndBool dab2 = LuaValueConvertToFloat(b);
@@ -316,27 +310,61 @@ static LuaValue _arith(LuaValue* a, LuaValue* b, Operator op) {
 			}
 		}
 	}
+
 	ret.type = LUA_TNIL;
 	return ret;
 }
 
+void PrintStack2(LuaState lua_state) {
+	int top = LuaStateGetTop(lua_state);
+	for (int i = 1; i <= top; ++i) {
+		LuaType type = LuaStateType(lua_state, i);
+		switch (type) {
+		case LUA_TBOOLEAN:
+			printf("[%s]", LuaStateToBoolean(lua_state, i) == 0 ? "false" : "true");
+			break;
+		case LUA_TNUMBER:
+			printf("[%lf]", LuaStateToNumber(lua_state, i));
+			break;
+		case LUA_TINTEGER:
+			printf("[%I64d]", LuaStateToInteger(lua_state, i));
+			break;
+		case LUA_TSTRING: {
+			CBuffer str = LuaStateToString(lua_state, i);
+			char buffer[1024] = { 0 };
+			memcpy(buffer, CBufferData(str), CBufferDataSize(str));
+			printf("[%s]", buffer);
+			break;
+		}
+		default:
+			printf("[%s]", LuaStateTypeName(lua_state, type));
+			break;
+		}
+
+	}
+	printf("\n");
+}
+
+
 void LuaStateArith(LuaState lua_state, ArithOp op) {
+	LuaValue a;
 	LuaValue b = LuaStackPop(lua_state->stack);
-	LuaValue a, bluaValue;
+	//PrintStack2(lua_state);
 	if (op != LUA_OPUNM && op != LUA_OPBNOT) {
 		a = LuaStackPop(lua_state->stack);
+		//PrintStack2(lua_state);
 	}
 	else {
 		a = b;
 	}
-
+	
 	Operator operator = g_operators[op];
-	LuaValue result = _arith(&a, &b, operator);
-	if (result.type != LUA_TNIL) {
-		LuaStackPush(lua_state->stack, &result);
+	LuaValue ret = _arith(&a, &b, operator);
+	if (ret.type != LUA_TNIL) {
+		LuaStackPush(lua_state->stack, &ret);
 	}
 	else {
-		printf("arithmetic error!\n");
+		printf("arithmetic error!");
 		exit(-1);
 	}
 }
@@ -346,7 +374,7 @@ static bool _eq(LuaValue* a, LuaValue* b) {
 		case LUA_TNIL:
 			return b->type == LUA_TNIL;
 		case LUA_TBOOLEAN:
-			return a->data.lua_boolean == b->data.lua_boolean;
+			return a->data.lua_boolearn == b->data.lua_boolearn;
 		case LUA_TSTRING:
 			return CBufferCompare(a->data.lua_string, b->data.lua_string);
 		case LUA_TINTEGER: {
@@ -358,21 +386,21 @@ static bool _eq(LuaValue* a, LuaValue* b) {
 				default:
 					return false;
 			}
-
 		}
 		case LUA_TNUMBER: {
 			switch (b->type) {
-			case LUA_TINTEGER:
-				return a->data.lua_number == (double)b->data.lua_integer;
-			case LUA_TNUMBER:
-				return a->data.lua_number == b->data.lua_number;
-			default:
-				return false;
+				case LUA_TNUMBER:
+					return a->data.lua_number == b->data.lua_number;
+				case LUA_TINTEGER:
+					return a->data.lua_number == (double)b->data.lua_number;
+				default:
+					return false;
 			}
 		}
 		default:
 			return a == b;
 	}
+
 }
 
 static bool _lt(LuaValue* a, LuaValue* b) {
@@ -399,13 +427,12 @@ static bool _lt(LuaValue* a, LuaValue* b) {
 				case LUA_TINTEGER:
 					return a->data.lua_number < (double)b->data.lua_integer;
 			}
-
 			break;
 		}
 	}
+
 	printf("comparsion error!");
 	exit(-1);
-
 }
 
 static bool _le(LuaValue* a, LuaValue* b) {
@@ -432,13 +459,12 @@ static bool _le(LuaValue* a, LuaValue* b) {
 		case LUA_TINTEGER:
 			return a->data.lua_number <= (double)b->data.lua_integer;
 		}
-
 		break;
 	}
 	}
+
 	printf("comparsion error!");
 	exit(-1);
-
 }
 
 bool LuaStateCompare(LuaState lua_state, int idx1, int idx2, CompareOp op) {
@@ -452,7 +478,7 @@ bool LuaStateCompare(LuaState lua_state, int idx1, int idx2, CompareOp op) {
 		case LUA_OPLE:
 			return _le(&a, &b);
 		default:
-			printf("invaild compare op!\n");
+			printf("invalid compare op!");
 			exit(-1);
 	}
 
@@ -466,7 +492,7 @@ void LuaStateLen(LuaState lua_state, int idx) {
 		i.data.lua_integer = CBufferDataSize(val.data.lua_string);
 		LuaStackPush(lua_state->stack, &i);
 	}
-	else {
+	else{
 		printf("length error!");
 		exit(-1);
 	}
@@ -479,7 +505,7 @@ void LuaStateConcat(LuaState lua_state, int n) {
 		s.data.lua_string = CBufferFromStr("", 1);
 		LuaStackPush(lua_state->stack, &s);
 	}
-	else {
+	else if(n >= 2) {
 		for (int i = 1; i < n; ++i) {
 			if (LuaStateIsString(lua_state, -1) && LuaStateIsString(lua_state, -2)) {
 				CBuffer s2 = LuaStateToString(lua_state, -1);
@@ -489,15 +515,14 @@ void LuaStateConcat(LuaState lua_state, int n) {
 				CBuffer s = CBufferAlloc(CBufferDataSize(s1) + CBufferDataSize(s2));
 				CBufferPush(s, CBufferData(s1), CBufferDataSize(s1));
 				CBufferPush(s, CBufferData(s2), CBufferDataSize(s2));
+
 				LuaValue val;
 				val.type = LUA_TSTRING;
 				val.data.lua_string = s;
 				LuaStackPush(lua_state->stack, &val);
-				/*CBufferFree(s1);
-				CBufferFree(s2);*/
 				continue;
 			}
-			printf("concatenation error!");
+			printf("concatnation error!");
 			exit(-1);
 		}
 	}
