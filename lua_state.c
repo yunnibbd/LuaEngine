@@ -4,9 +4,11 @@
 #include <string.h>
 #include <stdio.h>
 
-LuaState LuaStateAlloc() {
+LuaState LuaStateAlloc(int stackSize, Prototype* proto) {
 	LuaState lua_state = malloc(sizeof(StructLuaState));
-	lua_state->stack = LuaStackAlloc(20);
+	lua_state->stack = LuaStackAlloc(stackSize);
+	lua_state->proto = proto;
+	lua_state->pc = 0;
 	return lua_state;
 }
 
@@ -188,6 +190,8 @@ StringAndBool LuaStateToStringX(LuaState lua_state, int idx) {
 			char* str = malloc(8);
 			sprintf(str, "%lf", val.data.lua_number);
 			CBuffer buffer = CBufferFromStr(str, strlen(str));
+			ret.b = true;
+			ret.s = buffer;
 			break;
 		}
 		case LUA_TINTEGER: {
@@ -525,5 +529,49 @@ void LuaStateConcat(LuaState lua_state, int n) {
 			printf("concatnation error!");
 			exit(-1);
 		}
+	}
+}
+
+uint32_t LusStateFetch(LuaState lua_state) {
+	uint32_t* pi = CVectorGet(lua_state->proto->Code, lua_state->pc);
+	++lua_state->pc;
+	return *pi;
+}
+
+void LuaStateGetConst(LuaState lua_state, int idx) {
+	ConstantType* constant_type = CVectorGet(lua_state->proto->Constants, idx);
+	LuaValue val;
+	switch (constant_type->tag) {
+		case CONSTANT_TAG_NIL:
+			val.type = LUA_TNIL;
+			break;
+		case CONSTANT_TAG_BOOLEAN:
+			val.type = LUA_TBOOLEAN;
+			val.data.lua_boolearn = constant_type->data.tag_boolean;
+			break;
+		case CONSTANT_TAG_INTEGER:
+			val.type = LUA_TINTEGER;
+			val.data.lua_integer = constant_type->data.tag_integer;
+			break;
+		case CONSTANT_TAG_NUMBER:
+			val.type = LUA_TNUMBER;
+			val.data.lua_number = constant_type->data.tag_number;
+			break;
+		case CONSTANT_TAG_STR:
+			val.type = LUA_TSTRING;
+			val.data.lua_string = constant_type->data.tag_str;
+			break;
+		default:
+			printf("LuaStateGetConst invaild\n");
+	}
+	LuaStackPush(lua_state->stack, &val);
+}
+
+void LuaStateGetRK(LuaState lua_state, int rk) {
+	if (rk > 0xff) { //constant
+		LuaStateGetConst(lua_state, rk & 0xff);
+	}
+	else { //register
+		LuaStatePushValue(lua_state, rk + 1);
 	}
 }

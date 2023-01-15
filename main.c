@@ -252,68 +252,6 @@ void PrintStack(LuaState lua_state) {
 }
 
 int main(int argc, const char* const* argv) {
-	/*const char* file_name = "luac2.out";
-	if (argc > 1) {
-		file_name = argv[1];
-	}
-	if (file_name != NULL) {
-		CBuffer buffer = LoadFromToCBuffer(file_name);
-		Prototype* proto = BinaryChunkUnDump(buffer);
-		PrintHeader(proto);
-		PrintCode(proto);
-		PrintDetail(proto);
-		printf("\nhello yunni\n");
-	}*/
-
-	//const char* greet = "hello yunni";
-
-
-	//LuaState lua_state = LuaStateAlloc();
-	//LuaStatePushBoolean(lua_state, true);								 PrintStack(lua_state);
-	///*LuaStatePrint(lua_state);
-	//printf("======================================\n");*/
-	//LuaStatePushInteger(lua_state, 10);									 PrintStack(lua_state);
-	///*LuaStatePrint(lua_state);
-	//printf("======================================\n");*/
-	//LuaStatePushNil(lua_state);											 PrintStack(lua_state);
-	///*LuaStatePrint(lua_state);
-	//printf("======================================\n");*/
-	//LuaStatePushString(lua_state, CBufferFromStr(greet, strlen(greet))); PrintStack(lua_state);
-	///*LuaStatePrint(lua_state);
-	//printf("======================================\n");*/
-	//LuaStatePushValue(lua_state, -4);									 PrintStack(lua_state);
-	///*LuaStatePrint(lua_state);
-	//printf("======================================\n");*/
-	//LuaStateReplace(lua_state, 3);										 PrintStack(lua_state);
-	///*LuaStatePrint(lua_state);
-	//printf("======================================\n");*/
-	//LuaStateSetTop(lua_state, 6);										 PrintStack(lua_state);
-	///*LuaStatePrint(lua_state);
-	//printf("======================================\n");*/
-	//LuaStateRemove(lua_state, -3);										 PrintStack(lua_state);
-	///*LuaStatePrint(lua_state);
-	//printf("======================================\n");*/
-	//LuaStateSetTop(lua_state, -5);										 PrintStack(lua_state);
-	///*LuaStatePrint(lua_state);
-	//printf("======================================\n");*/
-	//LuaStateFree(lua_state);
-
-	printf("hello yunni\n");
-	LuaState lua_state = LuaStateAlloc();
-
-	LuaStatePushInteger(lua_state, 1);
-	LuaStatePushString(lua_state, CBufferFromStr("2.0", 3));
-	LuaStatePushString(lua_state, CBufferFromStr("3.0", 3));
-	LuaStatePushNumber(lua_state, 4.0);
-	PrintStack(lua_state);
-
-	LuaStateArith(lua_state, LUA_OPADD);  PrintStack(lua_state);
-	LuaStateArith(lua_state, LUA_OPBNOT); PrintStack(lua_state);
-	LuaStateLen(lua_state, 2);	PrintStack(lua_state);
-	LuaStateConcat(lua_state, 3); PrintStack(lua_state);
-	LuaStatePushBoolean(lua_state, LuaStateCompare(lua_state, 1, 2, LUA_OPEQ));
-	PrintStack(lua_state);
-
-	LuaStateFree(lua_state);
+	
 	return 0;
 }

@@ -2,6 +2,7 @@
 #define __LUA_STATE_H__
 #include "lua_stack.h"
 #include "common_types.h"
+#include "binary_chunk.h"
 #include <inttypes.h>
 
 typedef int LuaType;
@@ -10,9 +11,11 @@ typedef int CompareOp;
 
 typedef struct {
 	LuaStack stack;
+	Prototype* proto;
+	int pc;
 }*LuaState, StructLuaState;
 
-LuaState LuaStateAlloc();
+LuaState LuaStateAlloc(int stackSize, Prototype* proto);
 
 void LuaStateFree(LuaState lua_state);
 
@@ -57,4 +60,14 @@ void LuaStateArith(LuaState lua_state, ArithOp op);
 bool LuaStateCompare(LuaState lua_state, int idx1, int idx2, CompareOp op);
 void LuaStateLen(LuaState lua_state, int idx);
 void LuaStateConcat(LuaState lua_state, int n);
+
+inline int LuaStatePC(LuaState lua_state) {
+	return lua_state->pc;
+}
+inline void LuaStateAddPC(LuaState lua_state, int n) {
+	lua_state->pc += n;
+}
+uint32_t LusStateFetch(LuaState lua_state);
+void LuaStateGetConst(LuaState lua_state, int idx);
+void LuaStateGetRK(LuaState lua_state, int rk);
 #endif

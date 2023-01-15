@@ -43,7 +43,7 @@ typedef struct {
 		CBuffer tag_str;
 	} data;
 
-	enum ConstantTypeTag tag;
+	enum ConstTypeTag tag;
 }ConstantType;
 
 typedef struct Prototype {
