@@ -21,11 +21,11 @@ typedef struct{
 	int a, sbx;
 } TAsBx;
 
-inline int Opcode(Instruction i) {
+inline int InstructionOpcode(Instruction i) {
 	return i & 0x3f;
 }
 
-inline TABC ABC(Instruction i) {
+inline TABC InstructionABC(Instruction i) {
 	TABC ret = {
 		i >> 6 & 0xff,
 		i >> 14 & 0x1ff,
@@ -34,7 +34,7 @@ inline TABC ABC(Instruction i) {
 	return ret;
 }
 
-inline TABx ABx(Instruction i) {
+inline TABx InstructionABx(Instruction i) {
 	TABx ret = {
 		i >> 6 & 0xff,
 		i >> 14
@@ -42,8 +42,8 @@ inline TABx ABx(Instruction i) {
 	return ret;
 }
 
-inline TAsBx AsBx(Instruction i) {
-	TABx temp = ABx(i);
+inline TAsBx InstructionAsBx(Instruction i) {
+	TABx temp = InstructionABx(i);
 	TAsBx ret = {
 		temp.a,
 		temp.bx - MAXARG_sBx
@@ -51,24 +51,24 @@ inline TAsBx AsBx(Instruction i) {
 	return ret;
 }
 
-inline int Ax(Instruction i) {
+inline int InstructionAx(Instruction i) {
 	return i >> 6;
 }
 
-inline const char* OpName(Instruction i) {
-	return g_opcodes[Opcode(i)].name;
+inline const char* InstructionOpName(Instruction i) {
+	return g_opcodes[InstructionOpcode(i)].name;
 }
 
-inline uint32_t OpMode(Instruction i) {
-	return g_opcodes[Opcode(i)].opMode;
+inline uint32_t InstructionOpMode(Instruction i) {
+	return g_opcodes[InstructionOpcode(i)].opMode;
 }
 
-inline uint32_t BMode(Instruction i) {
-	return g_opcodes[Opcode(i)].argBMode;
+inline uint32_t InstructionBMode(Instruction i) {
+	return g_opcodes[InstructionOpcode(i)].argBMode;
 }
 
-inline uint32_t CMode(Instruction i) {
-	return g_opcodes[Opcode(i)].argCMode;
+inline uint32_t InstructionCMode(Instruction i) {
+	return g_opcodes[InstructionOpcode(i)].argCMode;
 }
 
 

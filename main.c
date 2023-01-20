@@ -95,11 +95,11 @@ void PrintHeader(Prototype* proto) {
 }
 
 void PrintOperands(Instruction instruction) {
-	switch (OpMode(instruction)) {
+	switch (InstructionOpMode(instruction)) {
 	case IABC: {
-		TABC tabc = ABC(instruction);
+		TABC tabc = InstructionABC(instruction);
 		printf("%d", tabc.a);
-		if (CMode(instruction) != OpArgN) {
+		if (InstructionCMode(instruction) != OpArgN) {
 			if (tabc.c > 0xff) {
 				printf(" %d", -1 - (tabc.c & 0xff));
 			}
@@ -107,7 +107,7 @@ void PrintOperands(Instruction instruction) {
 				printf(" %d", tabc.c);
 			}
 		}
-		if (BMode(instruction) != OpArgN) {
+		if (InstructionBMode(instruction) != OpArgN) {
 			if (tabc.b > 0xff) {
 				printf(" %d", -1 - (tabc.b & 0xff));
 			}
@@ -118,9 +118,9 @@ void PrintOperands(Instruction instruction) {
 		break;
 	}
 	case IABx: {
-		TABx tabx = ABx(instruction);
+		TABx tabx = InstructionABx(instruction);
 		printf("%d", tabx.a);
-		if (BMode(instruction) == OpArgK) {
+		if (InstructionBMode(instruction) == OpArgK) {
 			printf(" %d", -1 - tabx.bx);
 		}
 		else {
@@ -129,12 +129,12 @@ void PrintOperands(Instruction instruction) {
 		break;
 	}
 	case IAsBx: {
-		TAsBx tasbx = AsBx(instruction);
+		TAsBx tasbx = InstructionAsBx(instruction);
 		printf("%d %d", tasbx.a, tasbx.sbx);
 		break;
 	}
 	case IAx: {
-		int ax = Ax(instruction);
+		int ax = InstructionAx(instruction);
 		printf("%d", ax);
 		break;
 	}
@@ -150,10 +150,10 @@ void PrintCode(Prototype* proto) {
 		uint32_t** line = CVectorGet(proto->LineInfo, i);
 		Instruction instruction = **val;
 		if (flag) {
-			printf("\t%d\t[%d]\t%s \t", i + 1, **line, OpName(instruction));
+			printf("\t%d\t[%d]\t%s \t", i + 1, **line, InstructionOpName(instruction));
 		}
 		else {
-			printf("\t%d\t[-]\t%s \t", i + 1, OpName(instruction));
+			printf("\t%d\t[-]\t%s \t", i + 1, InstructionOpName(instruction));
 		}
 		PrintOperands(instruction);
 		printf("\n");
