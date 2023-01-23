@@ -39,6 +39,9 @@
     <ClCompile Include="lua_state.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="lua_vm.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cbuffer_stream.h">

@@ -1,6 +1,6 @@
 #ifndef __LUA_VALUE_H__
 #define __LUA_VALUE_H__
-#include "common_types.h"
+#include "lua_common_type.h"
 #include "lua_math.h"
 
 enum LuaType {

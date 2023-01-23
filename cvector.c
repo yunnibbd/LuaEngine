@@ -36,7 +36,7 @@ void CVectorFree(CVector vector) {
 	if (vector != NULL) {
 		if (vector->vector_root_ != NULL) {
 			if (vector->free_func_ != NULL) {
-				for (size_t i = 0; i < vector->vector_data_size_; ++i) {
+				for (int i = 0; i < vector->vector_data_size_; ++i) {
 					void* cur = ((char*)vector->vector_root_) + vector->vector_item_size_ * i;
 					vector->free_func_(cur);
 				}

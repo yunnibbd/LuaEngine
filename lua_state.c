@@ -1,5 +1,6 @@
 #include "lua_state.h"
 #include "lua_value.h"
+#include "lua_stack.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -19,7 +20,7 @@ void LuaStateFree(LuaState lua_state) {
 
 /* basic stack manipulation */
 int LuaStateGetTop(LuaState lua_state) {
-	return lua_state->stack->top;
+	return LuaStackGetTop(lua_state->stack);
 }
 
 int LuaStateAbsIndex(LuaState lua_state, int idx) {
@@ -60,7 +61,7 @@ void LuaStateRemove(LuaState lua_state, int idx){
 }
 
 void LuaStateRotate(LuaState lua_state, int idx, int n) {
-	int t = lua_state->stack->top - 1;
+	int t = LuaStackGetTop(lua_state->stack) - 1;
 	int p = LuaStackAbsIndex(lua_state->stack, idx) - 1;
 	int m;
 	if (n > 0) {
@@ -80,7 +81,7 @@ void LuaStateSetTop(LuaState lua_state, int idx) {
 		printf("stack underflow!");
 		exit(-1);
 	}
-	int n = lua_state->stack->top - new_top;
+	int n = LuaStackGetTop(lua_state->stack) - new_top;
 	if (n > 0) {
 		for (int i = 0; i < n; ++i) {
 			LuaStackPop(lua_state->stack);
@@ -532,7 +533,7 @@ void LuaStateConcat(LuaState lua_state, int n) {
 	}
 }
 
-uint32_t LusStateFetch(LuaState lua_state) {
+uint32_t LuaStateFetch(LuaState lua_state) {
 	uint32_t* pi = CVectorGet(lua_state->proto->Code, lua_state->pc);
 	++lua_state->pc;
 	return *pi;

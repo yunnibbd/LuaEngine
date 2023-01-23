@@ -1,5 +1,5 @@
-#include "lua_stack.h"
 #include "lua_value.h"
+#include "cvector.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +11,11 @@ do{\
 		i = i + lua_stack->top + 1;\
 	}\
 }while(0)
+
+typedef struct {
+	CVector slots;
+	int top;
+} *LuaStack, StructLuaStack;
 
 static void LuaValueFreeFunc(LuaValue* val) {
 	if (val->type == LUA_TSTRING) {
@@ -106,4 +111,12 @@ void LuaStackSet(LuaStack lua_stack, int idx, LuaValue* val) {
 	}
 	printf("invaild index!");
 	exit(-1);;
+}
+
+int LuaStackGetTop(LuaStack lua_stack) {
+	return lua_stack->top;
+}
+
+CVector LuaStackGetSlots(LuaStack lua_stack) {
+	return lua_stack->slots;
 }

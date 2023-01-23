@@ -2,9 +2,9 @@
 #define __C_BUFFER_STREAM_H__
 #include <stdbool.h>
 #include <inttypes.h>
-#include "cbuffer.h"
 
 typedef void* CBufferStream;
+typedef void* CBuffer;
 
 CBufferStream CBufferStreamAlloc(int size);
 

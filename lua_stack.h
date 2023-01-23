@@ -1,13 +1,11 @@
 #ifndef __LUA_STACK_H__
 #define __LUA_STACK_H__
-#include "cvector.h"
 #include "lua_value.h"
 #include <stdbool.h>
 
-typedef struct {
-	CVector slots;
-	int top;
-} *LuaStack, StructLuaStack;
+typedef void* CVector;
+
+typedef void* LuaStack;
 
 LuaStack LuaStackAlloc(int size);
 
@@ -22,11 +20,15 @@ void LuaStackPush(LuaStack lua_stack, LuaValue* val);
 LuaValue LuaStackPop(LuaStack lua_stack);
 
 int LuaStackAbsIndex(LuaStack lua_stack, int idx);
-
+ 
 bool LuaStackIsVaild(LuaStack lua_stack, int idx);
 
 LuaValue LuaStackGet(LuaStack lua_stack, int idx);
 
 void LuaStackSet(LuaStack lua_stack, int idx, LuaValue* val);
+
+inline int LuaStackGetTop(LuaStack lua_stack);
+              
+inline CVector LuaStackGetSlots(LuaStack lua_stack);
 
 #endif

@@ -1,6 +1,7 @@
 #ifndef __LUA_MATH_H__
 #define __LUA_MATH_H__
-#include "common_types.h"
+#include "lua_common_type.h"
+#include <math.h>
 
 enum LuaMathOp {
 	LUA_OPADD,		   // +

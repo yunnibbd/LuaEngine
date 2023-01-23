@@ -19,7 +19,6 @@ static CVector BinaryChunkReadLocVars();
 static CVector BinaryChunkReadUpvalueNames();
 static Prototype* BinaryChunkReadProto(CBuffer parent);
 
-
 Prototype* BinaryChunkUnDump(CBuffer buffer) {
 	BinaryChunkInit(buffer);
 	if (!BinaryChunkCheckHead()) {
@@ -118,7 +117,6 @@ bool BinaryChunkCheckHead() {
 	return false;
 }
 
-
 static void CodeFreeFunc(uint32_t* element) {
 	free(element);
 }
@@ -131,10 +129,10 @@ static CVector BinaryChunkReadCode() {
 	uint32_t code_element_len = CBufferStreamReadUInt32(buffer_stream);
 	CVector codes = CVectorAlloc(code_element_len, sizeof(uint32_t), CodeFreeFunc, NULL, CodeCopyFunc);
 	uint32_t* temp;
-	for (int i = 0; i < code_element_len; ++i) {
+	for (uint32_t i = 0; i < code_element_len; ++i) {
 		temp = malloc(sizeof(uint32_t));
 		*temp = CBufferStreamReadUInt32(buffer_stream);
-		CVectorPushBack(codes, &temp);
+		CVectorPushBack(codes, temp);
 	}
 	return codes;
 }
@@ -143,30 +141,30 @@ static ConstantType BinaryChunkReadConstant() {
 	uint8_t tag = CBufferStreamReadUInt8(buffer_stream);
 	ConstantType type;
 	switch (tag) {
-	case TAG_NIL:
-		type.tag = CONSTANT_TAG_NIL;
-		type.data.tag_nil = 0;
-		break;
-	case TAG_BOOLEAN:
-		type.tag = CONSTANT_TAG_BOOLEAN;
-		type.data.tag_boolean = (CBufferStreamReadUInt8(buffer_stream) != 0);
-		break;
-	case TAG_INTEGER:
-		type.tag = CONSTANT_TAG_INTEGER;
-		type.data.tag_integer = CBufferStreamReadUInt64(buffer_stream);
-		break;
-	case TAG_NUMBER:
-		type.tag = CONSTANT_TAG_NUMBER;
-		type.data.tag_number = CBufferStreamReadDouble(buffer_stream);
-		break;
-	case TAG_SHORT_STR:
-	case TAG_LONG_STR:
-		type.tag = CONSTANT_TAG_STR;
-		type.data.tag_str = BinaryChunkReadString();
-		break;
-	default:
-		assert(0);
-		break;
+		case TAG_NIL:
+			type.tag = CONSTANT_TAG_NIL;
+			type.data.tag_nil = 0;
+			break;
+		case TAG_BOOLEAN:
+			type.tag = CONSTANT_TAG_BOOLEAN;
+			type.data.tag_boolean = (CBufferStreamReadUInt8(buffer_stream) != 0);
+			break;
+		case TAG_INTEGER:
+			type.tag = CONSTANT_TAG_INTEGER;
+			type.data.tag_integer = CBufferStreamReadUInt64(buffer_stream);
+			break;
+		case TAG_NUMBER:
+			type.tag = CONSTANT_TAG_NUMBER;
+			type.data.tag_number = CBufferStreamReadDouble(buffer_stream);
+			break;
+		case TAG_SHORT_STR:
+		case TAG_LONG_STR:
+			type.tag = CONSTANT_TAG_STR;
+			type.data.tag_str = BinaryChunkReadString();
+			break;
+		default:
+			assert(0);
+			break;
 	}
 	return type;
 }

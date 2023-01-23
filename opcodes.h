@@ -1,6 +1,12 @@
 #ifndef __OPCODES_H__
 #define __OPCODES_H__
-#include "cbuffer.h"
+#include "instruction.h"
+#include "lua_common_type.h"
+
+typedef void* CBuffer;
+typedef void* LuaVM;
+
+typedef void(*InstructoinActionFuncType)(LuaVM vm, Instruction instruction);
 
 enum CodecMode {
 	IABC,
@@ -38,6 +44,7 @@ typedef struct {
 	unsigned char argCMode; //C arg mode
 	unsigned char opMode;	//op mode
 	CBuffer name;
+	InstructoinActionFuncType action;
 } OpCode;
 
 extern OpCode g_opcodes[47];

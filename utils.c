@@ -24,7 +24,7 @@ char* LoadFileContent(const char* file_name) {
 	return buffer;
 }
 
-CBuffer LoadFromToCBuffer(const char* file_name) {
+CBuffer LoadFileToCBuffer(const char* file_name) {
 	char *buffer = NULL;
 	int len = 0;
 	OPENANDREAD(file_name, buffer, len);
