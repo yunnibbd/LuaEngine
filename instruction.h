@@ -26,8 +26,8 @@ inline int InstructionOpcode(Instruction i) {
 inline TABC InstructionABC(Instruction i) {
 	TABC ret = {
 		(i >> 6) & 0xff,
-		(i >> 14) & 0x1ff,
-		(i >> 23) & 0x1ff
+		(i >> 23) & 0x1ff,
+		(i >> 14) & 0x1ff
 	};
 	return ret;
 }

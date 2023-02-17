@@ -1,12 +1,14 @@
 #include "lua_vm.h"
 #include "lua_state.h"
 #include "lua_math.h"
+#include "lua_value.h"
 
 static void _compare(LuaVM vm, Instruction i, CompareOp op);
 
 void LuaVMMove(LuaVM vm, Instruction i) {
 	TABC abc = InstructionABC(i);
 	abc.a += 1;
+	abc.b += 1;
 	LuaStateCopy(vm, abc.b, abc.a);
 }
 
@@ -52,7 +54,8 @@ void LuaVMLoadK(LuaVM vm, Instruction i) {
 void LuaVMLoadKx(LuaVM vm, Instruction i) {
 	TABx abx = InstructionABx(i);
 	abx.a += 1;
-	Instruction ax = LuaStateFetch(vm);
+	
+	Instruction ax = InstructionAx(LuaStateFetch(vm));
 	LuaStateGetConst(vm, ax);
 	LuaStateReplace(vm, abx.a);
 }
@@ -229,8 +232,8 @@ void LuaVMForLoop(LuaVM vm, Instruction i) {
 	//R(A) <? = R(A+1)
 	bool isPositiveStep = LuaStateToNumber(vm, asbx.a + 2) >= 0;
 	if (
-		(isPositiveStep && LuaStateCompare(vm, asbx.a, asbx.a + 1, LUA_OPLE)) ||
-		(!isPositiveStep && LuaStateCompare(vm, asbx.a + 1, asbx.a, LUA_OPLE))
+		isPositiveStep && LuaStateCompare(vm, asbx.a, asbx.a + 1, LUA_OPLE) ||
+		!isPositiveStep && LuaStateCompare(vm, asbx.a + 1, asbx.a, LUA_OPLE)
 	){
 		LuaStateAddPC(vm, asbx.sbx);
 		LuaStateCopy(vm, asbx.a, asbx.a + 3);

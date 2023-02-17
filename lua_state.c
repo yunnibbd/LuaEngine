@@ -295,10 +295,10 @@ static LuaValue _arith(LuaValue* a, LuaValue* b, Operator op) {
 		}
 	}
 	else {
-		if (op.floatFunc != NULL) {
+		if (op.integerFunc != NULL) {
 			if (a->type == LUA_TINTEGER) {
 				if (b->type == LUA_TINTEGER) {
-					ret.data.lua_integer = op.integerFunc(a->data.lua_integer, a->data.lua_integer);
+					ret.data.lua_integer = op.integerFunc(a->data.lua_integer, b->data.lua_integer);
 					ret.type = LUA_TINTEGER;
 					return ret;
 				}
@@ -320,50 +320,20 @@ static LuaValue _arith(LuaValue* a, LuaValue* b, Operator op) {
 	return ret;
 }
 
-void PrintStack2(LuaState lua_state) {
-	int top = LuaStateGetTop(lua_state);
-	for (int i = 1; i <= top; ++i) {
-		LuaType type = LuaStateType(lua_state, i);
-		switch (type) {
-		case LUA_TBOOLEAN:
-			printf("[%s]", LuaStateToBoolean(lua_state, i) == 0 ? "false" : "true");
-			break;
-		case LUA_TNUMBER:
-			printf("[%lf]", LuaStateToNumber(lua_state, i));
-			break;
-		case LUA_TINTEGER:
-			printf("[%I64d]", LuaStateToInteger(lua_state, i));
-			break;
-		case LUA_TSTRING: {
-			CBuffer str = LuaStateToString(lua_state, i);
-			char buffer[1024] = { 0 };
-			memcpy(buffer, CBufferData(str), CBufferDataSize(str));
-			printf("[%s]", buffer);
-			break;
-		}
-		default:
-			printf("[%s]", LuaStateTypeName(lua_state, type));
-			break;
-		}
-
-	}
-	printf("\n");
-}
-
-
 void LuaStateArith(LuaState lua_state, ArithOp op) {
 	LuaValue a;
 	LuaValue b = LuaStackPop(lua_state->stack);
-	//PrintStack2(lua_state);
 	if (op != LUA_OPUNM && op != LUA_OPBNOT) {
 		a = LuaStackPop(lua_state->stack);
-		//PrintStack2(lua_state);
 	}
 	else {
 		a = b;
 	}
 	
 	Operator operator = g_operators[op];
+	if (op == LUA_OPADD) {
+		int i = 1;
+	}
 	LuaValue ret = _arith(&a, &b, operator);
 	if (ret.type != LUA_TNIL) {
 		LuaStackPush(lua_state->stack, &ret);

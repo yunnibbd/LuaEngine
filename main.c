@@ -13,7 +13,7 @@
 
 OpCode g_opcodes[47] = {
 	/*     T  A     B       C    mode    name */
-	{0, 1, OpArgR, OpArgN, IABC,  "MOVE    ", LuaVMAdd},
+	{0, 1, OpArgR, OpArgN, IABC,  "MOVE    ", LuaVMMove},
 	{0, 1, OpArgK, OpArgN, IABx,  "LOADK   ", LuaVMLoadK},
 	{0, 1, OpArgN, OpArgN, IABx,  "LOADKX  ", LuaVMLoadKx},
 	{0, 1, OpArgU, OpArgU, IABC,  "LOADBOOL", LuaVMLoadBool},
@@ -32,7 +32,7 @@ OpCode g_opcodes[47] = {
 	{0, 1, OpArgK, OpArgK, IABC,  "MOD     ", LuaVMMod},
 	{0, 1, OpArgK, OpArgK, IABC,  "POW     ", LuaVMPow},
 	{0, 1, OpArgK, OpArgK, IABC,  "DIV     ", LuaVMDiv},
-	{0, 1, OpArgK, OpArgK, IABC,  "IDIV    ", LuaVMDiv},
+	{0, 1, OpArgK, OpArgK, IABC,  "IDIV    ", LuaVMIDiv},
 	{0, 1, OpArgK, OpArgK, IABC,  "BAND    ", LuaVMBand},
 	{0, 1, OpArgK, OpArgK, IABC,  "BOR     ", LuaVMBor},
 	{0, 1, OpArgK, OpArgK, IABC,  "BXOR    ", LuaVMBxor},

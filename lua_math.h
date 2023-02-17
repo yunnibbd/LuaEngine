@@ -57,14 +57,6 @@ inline double lua_fmul(double a, double b) {
 	return  a * b;
 }
 
-inline int64_t lua_imod(int64_t a, int64_t b) {
-	return a % b;
-}
-
-inline double lua_fmod(double a, double b) {
-	return fmod(a, b);
-}
-
 inline double lua_pow(double a, double b) {
 	return pow(a, b);
 }
@@ -120,6 +112,10 @@ inline int64_t IFloorDiv(int64_t a, int64_t b) {
 inline double FFloorDiv(double a, double b) {
 	return floorl(a / b);
 }
+
+#define lua_imod IMod
+
+#define lua_fmod FMod
 
 inline int64_t IMod(int64_t a, int64_t b) {
 	return a - IFloorDiv(a, b) * b;
