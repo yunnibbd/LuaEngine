@@ -1,7 +1,7 @@
 #ifndef __OPCODES_H__
 #define __OPCODES_H__
 #include "instruction.h"
-#include "lua_common_type.h"
+#include "common_types.h"
 
 typedef void* CBuffer;
 typedef void* LuaVM;

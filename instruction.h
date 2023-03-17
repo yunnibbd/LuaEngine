@@ -1,7 +1,7 @@
 #ifndef __INSTRUCTION_H__
 #define __INSTRUCTION_H__
 #include <inttypes.h>
-#include "lua_common_type.h"
+#include "common_types.h"
 #include "opcodes.h"
 
 #define MAXARG_Bx ((1 << 18) - 1)

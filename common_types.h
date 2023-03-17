@@ -21,4 +21,6 @@ typedef struct {
 	bool b;
 }StringAndBool;
 
+typedef uint32_t Instruction;
+
 #endif

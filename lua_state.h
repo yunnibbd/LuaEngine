@@ -1,6 +1,6 @@
 #ifndef __LUA_STATE_H__
 #define __LUA_STATE_H__
-#include "lua_common_type.h"
+#include "common_types.h"
 #include "binary_chunk.h"
 #include <inttypes.h>
 
