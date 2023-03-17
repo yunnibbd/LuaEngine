@@ -83,5 +83,8 @@
     <ClInclude Include="lua_vm.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="common_types.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
