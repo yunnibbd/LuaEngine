@@ -127,6 +127,7 @@
     <ClCompile Include="binary_chunk.c" />
     <ClCompile Include="cbuffer.c" />
     <ClCompile Include="cbuffer_stream.c" />
+    <ClCompile Include="chash_int_map.c" />
     <ClCompile Include="cvector.c" />
     <ClCompile Include="lua_stack.c" />
     <ClCompile Include="lua_state.c" />
@@ -138,6 +139,7 @@
     <ClInclude Include="binary_chunk.h" />
     <ClInclude Include="cbuffer.h" />
     <ClInclude Include="cbuffer_stream.h" />
+    <ClInclude Include="chash_int_map.h" />
     <ClInclude Include="common_types.h" />
     <ClInclude Include="cvector.h" />
     <ClInclude Include="instruction.h" />

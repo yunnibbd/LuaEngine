@@ -16,8 +16,7 @@ void LuaVMJmp(LuaVM vm, Instruction i) {
 	TAsBx asbx = InstructionAsBx(i);
 	LuaStateAddPC(vm, asbx.sbx);
 	if (asbx.a != 0) {
-		printf("todo!");
-		exit(-1);
+		PANIC("todo!");
 	}
 }
 

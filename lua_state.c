@@ -78,8 +78,7 @@ void LuaStateRotate(LuaState lua_state, int idx, int n) {
 void LuaStateSetTop(LuaState lua_state, int idx) {
 	int new_top = LuaStackAbsIndex(lua_state->stack, idx);
 	if (new_top < 0) {
-		printf("stack underflow!");
-		exit(-1);
+		PANIC("stack underflow!");
 	}
 	int n = LuaStackGetTop(lua_state->stack) - new_top;
 	if (n > 0) {
@@ -339,8 +338,7 @@ void LuaStateArith(LuaState lua_state, ArithOp op) {
 		LuaStackPush(lua_state->stack, &ret);
 	}
 	else {
-		printf("arithmetic error!");
-		exit(-1);
+		PANIC("arithmetic error!");
 	}
 }
 
@@ -406,8 +404,7 @@ static bool _lt(LuaValue* a, LuaValue* b) {
 		}
 	}
 
-	printf("comparsion error!");
-	exit(-1);
+	PANIC("comparsion error!");
 }
 
 static bool _le(LuaValue* a, LuaValue* b) {
@@ -438,8 +435,7 @@ static bool _le(LuaValue* a, LuaValue* b) {
 	}
 	}
 
-	printf("comparsion error!");
-	exit(-1);
+	PANIC("comparsion error!");
 }
 
 bool LuaStateCompare(LuaState lua_state, int idx1, int idx2, CompareOp op) {
@@ -453,8 +449,7 @@ bool LuaStateCompare(LuaState lua_state, int idx1, int idx2, CompareOp op) {
 		case LUA_OPLE:
 			return _le(&a, &b);
 		default:
-			printf("invalid compare op!");
-			exit(-1);
+			PANIC("invalid compare op!");
 	}
 
 }
@@ -468,8 +463,7 @@ void LuaStateLen(LuaState lua_state, int idx) {
 		LuaStackPush(lua_state->stack, &i);
 	}
 	else{
-		printf("length error!");
-		exit(-1);
+		PANIC("length error!");
 	}
 }
 
@@ -497,8 +491,7 @@ void LuaStateConcat(LuaState lua_state, int n) {
 				LuaStackPush(lua_state->stack, &val);
 				continue;
 			}
-			printf("concatnation error!");
-			exit(-1);
+			PANIC("concatnation error!");
 		}
 	}
 }

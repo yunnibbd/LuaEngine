@@ -42,6 +42,9 @@
     <ClCompile Include="lua_vm.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="chash_int_map.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cbuffer_stream.h">
@@ -84,6 +87,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="common_types.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="chash_int_map.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

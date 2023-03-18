@@ -60,8 +60,7 @@ void LuaStackCheck(LuaStack lua_stack, int n) {
 
 void LuaStackPush(LuaStack lua_stack, LuaValue* val) {
 	if (CVectorAllSize(lua_stack->slots) == lua_stack->top) {
-		printf("stack overflow!");
-		exit(-1);
+		PANIC("stack overflow!");
 	}
 	CVectorPushBack(lua_stack->slots, val);
 	++lua_stack->top;
@@ -69,8 +68,7 @@ void LuaStackPush(LuaStack lua_stack, LuaValue* val) {
 
 LuaValue LuaStackPop(LuaStack lua_stack) {
 	if (lua_stack->top < 1) {
-		printf("stack underflow!");
-		exit(-1);
+		PANIC("stack underflow!");
 	}
 	--lua_stack->top;
 	LuaValue* pVal = CVectorGet(lua_stack->slots, lua_stack->top);
@@ -109,8 +107,7 @@ void LuaStackSet(LuaStack lua_stack, int idx, LuaValue* val) {
 		CVectorSet(lua_stack->slots, idx - 1, val);
 		return;
 	}
-	printf("invaild index!");
-	exit(-1);;
+	PANIC("invaild index!");
 }
 
 int LuaStackGetTop(LuaStack lua_stack) {

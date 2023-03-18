@@ -1,5 +1,6 @@
 #include "binary_chunk.h"
 #include "cbuffer_stream.h"
+#include "common_types.h"
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
@@ -22,7 +23,7 @@ static Prototype* BinaryChunkReadProto(CBuffer parent);
 Prototype* BinaryChunkUnDump(CBuffer buffer) {
 	BinaryChunkInit(buffer);
 	if (!BinaryChunkCheckHead()) {
-		exit(-1);
+		PANIC("CheckHeadError");
 	}
 	BinaryChunkReadByte();
 	return BinaryChunkReadProto(NULL);

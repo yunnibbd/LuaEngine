@@ -75,8 +75,7 @@ inline void InstructionExecute(Instruction i, LuaVM vm) {
 		action(vm, i);
 	}
 	else {
-		printf("%s\n", InstructionOpName(i));
-		exit(-1);
+		PANIC("%s\n", InstructionOpName(i));
 	}
 }
 
