@@ -12,6 +12,8 @@ void CHashIntMapSet(CHashIntMap hash_map, int64_t key, void* value);
 
 void CHashIntMapRemoveByKey(CHashIntMap hash_map, int64_t key);
 
+void CHashIntMapRemoveByKeyWithoutFree(CHashIntMap hash_map, int64_t key);
+
 void CHashIntMapRemoveByValue(CHashIntMap hash_map, void* value);
 
 void* CHashIntMapGet(CHashIntMap hash_map, int64_t key);

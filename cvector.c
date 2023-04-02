@@ -103,3 +103,17 @@ void CVectorDecDataSize(CVector vector) {
 		vector->vector_data_size_ = 0;
 	}
 }
+
+void CVectorRemove(CVector vector, int start_index, int count) {
+	if(vector->vector_data_size_ - 1 < start_index) {
+		return;
+	}
+	if (vector->vector_data_size_ - start_index <= count) {
+		vector->vector_data_size_ = start_index;
+		return;
+	}
+	char* dst_addr = (char*)vector->vector_root_ + vector->vector_data_size_ * start_index;
+	char* src_addr = (char*)vector->vector_root_ + vector->vector_data_size_ * (start_index + count);
+	memcpy(dst_addr, src_addr, vector->vector_item_size_ * count);
+	vector->vector_data_size_ -= count;
+}

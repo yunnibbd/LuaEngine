@@ -1,5 +1,6 @@
 #include "lua_state.h"
 #include "lua_value.h"
+#include "lua_table.h"
 #include "lua_stack.h"
 #include <stdlib.h>
 #include <string.h>
@@ -460,6 +461,12 @@ void LuaStateLen(LuaState lua_state, int idx) {
 		LuaValue i;
 		i.type = LUA_TINTEGER;
 		i.data.lua_integer = CBufferDataSize(val.data.lua_string);
+		LuaStackPush(lua_state->stack, &i);
+	}
+	else if(val.type == LUA_TTABLE) {
+		LuaValue i;
+		i.type = LUA_TINTEGER;
+		i.data.lua_integer = LuaTableLen(val.data.lua_table);
 		LuaStackPush(lua_state->stack, &i);
 	}
 	else{

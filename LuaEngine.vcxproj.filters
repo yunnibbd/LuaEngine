@@ -45,6 +45,9 @@
     <ClCompile Include="chash_int_map.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="lua_table.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cbuffer_stream.h">
@@ -90,6 +93,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="chash_int_map.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_table.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

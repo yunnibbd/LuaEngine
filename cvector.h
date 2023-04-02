@@ -32,4 +32,6 @@ int CVectorSize(CVector vector);
 
 int CVectorAllSize(CVector vector);
 
+void CVectorRemove(CVector vector, int start_index, int count);
+
 #endif

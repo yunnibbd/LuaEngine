@@ -131,6 +131,7 @@
     <ClCompile Include="cvector.c" />
     <ClCompile Include="lua_stack.c" />
     <ClCompile Include="lua_state.c" />
+    <ClCompile Include="lua_table.c" />
     <ClCompile Include="lua_vm.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="utils.c" />
@@ -146,6 +147,7 @@
     <ClInclude Include="lua_math.h" />
     <ClInclude Include="lua_stack.h" />
     <ClInclude Include="lua_state.h" />
+    <ClInclude Include="lua_table.h" />
     <ClInclude Include="lua_value.h" />
     <ClInclude Include="lua_vm.h" />
     <ClInclude Include="opcodes.h" />

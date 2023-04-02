@@ -23,6 +23,7 @@ typedef struct {
 		int64_t lua_integer;
 		double lua_number;
 		CBuffer lua_string;
+		void* lua_table;
 	} data;
 	enum LuaType type;
 } LuaValue;

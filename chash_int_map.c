@@ -68,6 +68,21 @@ void CHashIntMapRemoveByKey(CHashIntMap hash_map, int64_t key) {
 	}
 }
 
+void CHashIntMapRemoveByKeyWithoutFree(CHashIntMap hash_map, int64_t key) {
+	int index = key % HASH_AREA;
+	struct HashNode** walk = &hash_map->hash_set[index];
+	while (*walk) {
+		if ((*walk)->key == key) {
+			struct HashNode* node = (*walk);
+			*walk = node->next;
+			node->next = NULL;
+			return;
+		}
+		walk = &((*walk)->next);
+	}
+}
+
+
 void CHashIntMapRemoveByValue(CHashIntMap hash_map, void* value) {
 	for (int i = 0; i < HASH_AREA; ++i) {
 		struct HashNode** walk = &hash_map->hash_set[i];
